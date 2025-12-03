@@ -1,0 +1,57 @@
+-- Category: 1. 누구와 떠나나요? (최대 3개)
+	INSERT INTO filter_category (id, name, multi_select, order_num, created_at)
+	VALUES (1, '누구와 떠나나요?(최대3개)', TRUE, 1, NOW())
+	ON CONFLICT (id) DO NOTHING;
+	
+	-- Category: 2. 여행 기간? (1개)
+	INSERT INTO filter_category (id, name, multi_select, order_num, created_at)
+	VALUES (2, '여행 기간?(1개)', FALSE, 2, NOW())
+	ON CONFLICT (id) DO NOTHING;
+	
+	-- Category: 3. 여행 스타일? (최대 5개)
+	INSERT INTO filter_category (id, name, multi_select, order_num, created_at)
+	VALUES (3, '여행 스타일?(최대5개)', TRUE, 3, NOW())
+	ON CONFLICT (id) DO NOTHING;
+	
+	-- Item: 카테고리 1 (누구와 떠나나요?)
+	INSERT INTO filter_item (id, filter_category_id, name, order_num, created_at) VALUES
+	(1, 1, '혼자', 1, NOW()),
+	(2, 1, '친구와', 2, NOW()),
+	(3, 1, '연인과', 3, NOW()),
+	(4, 1, '배우자와', 4, NOW()),
+	(5, 1, '아이와', 5, NOW()),
+	(6, 1, '부모님과', 6, NOW()),
+	(7, 1, '반려동물과', 7, NOW())
+	ON CONFLICT (id) DO NOTHING;
+	
+	-- Item: 카테고리 2 (여행 기간?)
+	INSERT INTO filter_item (id, filter_category_id, name, order_num, created_at) VALUES
+	(8, 2, '당일', 1, NOW()),
+	(9, 2, '1박2일', 2, NOW()),
+	(10, 2, '2박3일', 3, NOW()),
+	(11, 2, '3박4일', 4, NOW()),
+	(12, 2, '4박5일', 5, NOW()),
+	(13, 2, '5박6일', 6, NOW()),
+	(14, 2, '7일 이상', 7, NOW())
+	ON CONFLICT (id) DO NOTHING;
+	
+	-- Item: 카테고리 3 (여행 스타일?)
+	INSERT INTO filter_item (id, filter_category_id, name, order_num, created_at) VALUES
+	(15, 3, '체험/액티비티', 1, NOW()),
+	(16, 3, 'SNS/핫플레이스', 2, NOW()),
+	(17, 3, '자연', 3, NOW()),
+	(18, 3, '유명 관광지', 4, NOW()),
+	(19, 3, '여유롭게', 5, NOW()),
+	(20, 3, '문화/예술/역사', 6, NOW()),
+	(21, 3, '여행지 느낌', 7, NOW()),
+	(22, 3, '쇼핑/음식', 8, NOW())
+	ON CONFLICT (id) DO NOTHING;
+
+	-- badge
+	INSERT INTO badge (id, name, like_min, like_max) VALUES
+	(1, '새싹', 0, 49),
+	(2, '입문자', 50, 199),
+	(3, '콜렉터', 200, 499),
+	(4, '전문가', 500, 999),
+	(5, '달인', 1000, 99999999)
+	ON CONFLICT (id) DO NOTHING;
