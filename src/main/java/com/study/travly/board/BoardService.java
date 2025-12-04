@@ -13,6 +13,7 @@ import com.study.travly.board.BoardSaveRequest.BoardPlaceFileDto;
 import com.study.travly.board.filter.BoardFilterService;
 import com.study.travly.board.place.BoardPlace;
 import com.study.travly.board.place.file.BoardPlaceFile;
+import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
 import com.study.travly.file.FileRepository;
 import com.study.travly.member.Member;
@@ -36,8 +37,8 @@ public class BoardService {
 	@Transactional
 	public Optional<Board> saveBoardWithAllDetails(BoardSaveRequest request) {
 		// Member 엔티티 조회 (FK 제약조건 만족을 위해 필요)
-		Member member = memberRepository.findById(request.getMemberId())
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원 ID입니다."));
+		Member member = memberRepository.findById(request.getMemberId()).orElseThrow(
+				() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", request.getMemberId())));
 
 		// Board 엔티티 생성 및 관계 설정
 		Board board = Board.builder().title(request.getTitle()).member(member).build();
@@ -48,7 +49,7 @@ public class BoardService {
 
 		if (request.getPlaces() != null) {
 			for (BoardPlaceDto placeDto : request.getPlaces()) {
-				boardPlaces.add(BoardPlaceDto2BoardPlace(placeDto, board, placeOrder++));
+				boardPlaces.add(boardPlaceDto2BoardPlace(placeDto, board, placeOrder++));
 			}
 		}
 
@@ -61,10 +62,10 @@ public class BoardService {
 		return Optional.of(newBoard);
 	}
 
-	private BoardPlaceFile BoardPlaceFileDto2BoardPlaceFile(BoardPlaceFileDto fileDto, BoardPlace boardPlace,
+	private BoardPlaceFile boardPlaceFileDto2BoardPlaceFile(BoardPlaceFileDto fileDto, BoardPlace boardPlace,
 			int orderNum) {
 		File file = fileRepository.findById(fileDto.getFileId())
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 파일 ID입니다."));
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 file.id [%d]", fileDto.getFileId())));
 
 		// BoardPlaceFile 객체 생성
 		BoardPlaceFile boardPlaceFile = new BoardPlaceFile(null, // id
@@ -76,7 +77,7 @@ public class BoardService {
 		return boardPlaceFile;
 	}
 
-	private BoardPlace BoardPlaceDto2BoardPlace(BoardPlaceDto placeDto, Board board, int placeOrder) {
+	private BoardPlace boardPlaceDto2BoardPlace(BoardPlaceDto placeDto, Board board, int placeOrder) {
 		BoardPlace boardPlace = new BoardPlace(null, // id
 				board, // board (참조 설정)
 				placeDto.getTitle(), placeDto.getContent(), placeOrder, // 순번 증가 (문제 없음)
@@ -90,7 +91,7 @@ public class BoardService {
 		int orderNum = 0;
 		if (placeDto.getFiles() != null) {
 			for (BoardPlaceFileDto fileDto : placeDto.getFiles()) {
-				boardPlaceFiles.add(BoardPlaceFileDto2BoardPlaceFile(fileDto, boardPlace, orderNum++));
+				boardPlaceFiles.add(boardPlaceFileDto2BoardPlaceFile(fileDto, boardPlace, orderNum++));
 			}
 		}
 		boardPlace.setFiles(boardPlaceFiles);
@@ -98,9 +99,16 @@ public class BoardService {
 		return boardPlace;
 	}
 
+	@Transactional
 	public Optional<Board> findByIdWithPlaces(Long id) {
+		Optional<Board> opt = boardRepository.findByIdWithPlaces(id);
+		if (!opt.isPresent())
+			throw new BadRequestException(String.format("존재하지 않는 board.id [%d]", id));
 
-		return boardRepository.findByIdWithPlaces(id);
+		opt.ifPresent(board -> {
+			boardRepository.incrementViewCount(id);
+		});
+		return opt;
 	}
 
 }

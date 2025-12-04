@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
 import com.study.travly.file.FileRepository;
 
@@ -40,8 +41,11 @@ public class FileUploadService {
 	public List<File> fileCreate(FileUploadDto dto, int thumbX, int thumbY) throws IOException {
 
 		List<MultipartFile> files = dto.getFiles();
-		if (files != null && !files.isEmpty())
-			log.info("----fileCreate() files.size() : " + files.size());
+
+		if (files == null || files.isEmpty())
+			throw new BadRequestException(String.format("key files가 존재하지 않거나 비어있습니다."));
+
+		log.info("----fileCreate() files.size() : " + files.size());
 
 		List<com.study.travly.file.File> lst = new ArrayList<>();
 
@@ -52,7 +56,7 @@ public class FileUploadService {
 				log.info("----fileUpload() getOriginalFilename() : " + originalFilename);
 				java.io.File folder = new java.io.File(fileDir);
 				if (!folder.exists())
-					folder.mkdir();
+					folder.mkdirs(); // 하위 폴더 모두 생성
 
 				byte[] fileData = file.getBytes();
 

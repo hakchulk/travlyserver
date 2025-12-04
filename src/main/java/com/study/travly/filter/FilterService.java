@@ -18,7 +18,7 @@ record ItemRequest(String name) {
 }
 
 //Category와 Item 목록을 담는 메인 요청 DTO
-record FilterRequest(String name, boolean multiSelect, int orderNum,
+record FilterRequest(String name, int multiSelectCount, int orderNum,
 		// Category에 종속될 Item 목록
 		Set<ItemRequest> items) {
 }
@@ -35,7 +35,7 @@ public class FilterService {
 
 		// 1. Category 엔티티 생성 및 저장
 		Category category = new Category(null, // id는 @GeneratedValue로 자동 생성
-				request.name(), request.multiSelect(), request.orderNum(), null // createdAt은 @PrePersist로 자동 생성
+				request.name(), request.multiSelectCount(), request.orderNum(), null // createdAt은 @PrePersist로 자동 생성
 				, null);
 		Category savedCategory = categoryRepository.save(category);
 

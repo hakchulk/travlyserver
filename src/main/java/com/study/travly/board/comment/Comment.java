@@ -24,7 +24,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "comment", uniqueConstraints = {
-		@UniqueConstraint(name = "UK_comment_board_member", columnNames = { "board_id", "member_id" }) })
+		@UniqueConstraint(name = "UK_comment__board_member", columnNames = { "board_id", "member_id" }) })
 @Getter
 @Setter
 @NoArgsConstructor // default Constructor

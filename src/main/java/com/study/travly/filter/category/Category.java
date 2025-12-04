@@ -28,15 +28,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Category {
 	@Id
-//	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	//	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(nullable = false)
 	private String name;
 
-	@Comment("filter item을 다중 선택 가능 한가?")
+	@Comment("filter item을 다중 선택 갯수. 1이면 다중 선택 불가")
 	@Column(nullable = false)
-	private boolean multiSelect;
+	private int multiSelectCount;
 
 	@Column(nullable = false)
 	private int orderNum;

@@ -21,5 +21,4 @@ public interface BoardFilterItemRepository extends JpaRepository<BoardFilterItem
 			      ORDER BY bfi.filterItem.id ASC
 			""")
 	List<BoardFilterItem> findAllByBoardIdOrderByFilterItemId(@Param("boardId") Long boardId);
-
 }

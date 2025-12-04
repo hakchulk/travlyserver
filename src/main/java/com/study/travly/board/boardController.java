@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 public class boardController {
 
@@ -19,6 +21,7 @@ public class boardController {
 	{
 	  "title": "제주도 2박 3일 힐링 여행 일정",
 	  "memberId": 2, 
+	  "filterItemIds": [4,5,7],
 	  "places": [
 	{
 	  "title": "첫째 날: 협재 해수욕장",
@@ -57,6 +60,7 @@ public class boardController {
 		return boardService.saveBoardWithAllDetails(req);
 	}
 
+	@Operation(summary = "특정 여행 기록 상세 조회", description = "board.id를 통해 단일 여행 기록을 조회하며, 조회수도 증가시킵니다.")
 	@GetMapping("board/{id}")
 	public Optional<Board> boardListView(@PathVariable("id") Long id) {
 		return boardService.findByIdWithPlaces(id);

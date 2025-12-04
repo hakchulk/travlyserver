@@ -2,6 +2,9 @@ package com.study.travly.member;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Comment;
+
 import com.study.travly.badge.Badge;
 import com.study.travly.file.File;
 
@@ -25,7 +28,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "member", uniqueConstraints = {
-		@UniqueConstraint(name = "UK_member_auth_uuid", columnNames = { "auth_uuid" } // DB 컬럼 이름
+		@UniqueConstraint(name = "UK_member__auth_uuid", columnNames = { "auth_uuid" } // DB 컬럼 이름
 		) })
 @Getter
 @Setter
@@ -46,11 +49,16 @@ public class Member {
 	@Column(nullable = false)
 	private String nickname;
 
-	@Column(nullable = false)
-	private int gender; // 1 : man, 2 : woman
-
+	@Comment("자기 소기")
 	private String introduction;
-	private LocalDateTime birthday;
+
+	@Comment("코멘트 알림 갯수")
+	@Column(nullable = false)
+	@ColumnDefault("0")
+	private int notificationCount;
+
+	//	private int gender; // 1 : man, 2 : woman
+	//	private LocalDateTime birthday;
 
 	@ManyToOne
 	@JoinColumn(name = "badge_id", nullable = false, foreignKey = @ForeignKey(name = "fk_member__badge_badge_id"))
@@ -58,8 +66,8 @@ public class Member {
 
 	// @OneToOne이면 디폴트로 사용 할 file_id를 공유 수 없다.
 	@ManyToOne
-	@JoinColumn(name = "file_id", nullable = false, unique = false, foreignKey = @ForeignKey(name = "fk_member__file_id"))
-	private File file;
+	@JoinColumn(name = "file_id", nullable = true, unique = false, foreignKey = @ForeignKey(name = "fk_member__file_id"))
+	private File profileImage;
 
 	@Column(nullable = false)
 	private LocalDateTime createdAt;

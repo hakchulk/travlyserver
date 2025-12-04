@@ -23,7 +23,7 @@ import lombok.Setter;
 @Entity
 // like는 키워드이므로 likes 사용
 @Table(name = "likes", uniqueConstraints = {
-		@UniqueConstraint(name = "UK_likes_board_member", columnNames = { "board_id", "member_id" }) })
+		@UniqueConstraint(name = "UK_likes__board_member", columnNames = { "board_id", "member_id" }) })
 @Getter
 @Setter
 @AllArgsConstructor
