@@ -1,8 +1,12 @@
 package com.study.travly.member;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +21,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	@Modifying
 	@Query("UPDATE Member m SET m.notificationCount = m.notificationCount + 1 WHERE m.id = :id")
 	int incrementNotificationCount(@Param("id") Long id);
+
+	// AuthUser의 id(UUID)로 Member 검색
+	// findByAuthUser_Id → JPA가 Member 엔티티의 authUser 필드 안에 있는 id를 자동으로 탐색합니다.
+	Optional<Member> findByAuthUser_Id(UUID id);
+
+	boolean existsByNickname(String nickname);
+
+	@Procedure(procedureName = "get_auth_user_by_id")
+	// 마찬가지로 DTO나 Projection을 반환 타입으로 사용해야 합니다.
+	Optional<AuthUserProjection> callAuthUserProcedure(@Param("user_uuid") UUID userUuid);
 }
