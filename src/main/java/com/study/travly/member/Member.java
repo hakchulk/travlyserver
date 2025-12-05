@@ -28,8 +28,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "member", uniqueConstraints = {
-		@UniqueConstraint(name = "UK_member__auth_uuid", columnNames = { "auth_uuid" } // DB 컬럼 이름
-		) })
+		@UniqueConstraint(name = "UK_member__auth_uuid", columnNames = { "auth_uuid" }),
+		@UniqueConstraint(name = "UK_member__nickname", columnNames = { "nickname" }) })
 @Getter
 @Setter
 @NoArgsConstructor // default Constructor
@@ -52,7 +52,7 @@ public class Member {
 	@Comment("자기 소기")
 	private String introduction;
 
-	@Comment("코멘트 알림 갯수")
+	@Comment("코멘트 알림 갯수. 0이면 알림 없음")
 	@Column(nullable = false)
 	@ColumnDefault("0")
 	private int notificationCount;
