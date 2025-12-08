@@ -13,8 +13,8 @@ public class MemberController {
 	MemberService memberService;
 
 	@PostMapping
-	public Member modifyMemeber(@RequestBody MemberModifyRequest req) {
-		return memberService.modifyMember(req);
+	public Member modifyCreateMember(@RequestBody MemberModifyRequest req) {
+		return memberService.modifyCreateMember(req);
 	}
 
 }
