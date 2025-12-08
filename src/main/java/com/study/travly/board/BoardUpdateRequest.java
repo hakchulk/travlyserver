@@ -9,10 +9,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BoardSaveRequest {
+public class BoardUpdateRequest {
 	// Board fields
 	private String title;
-	private Long memberId; // Member 객체 대신 ID를 받음
+
+	// memberId 는 변경 하지 않는다.
 
 	private List<Long> filterItemIds;
 

@@ -13,6 +13,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	@Query("SELECT DISTINCT b FROM Board b JOIN FETCH b.places p JOIN FETCH b.member m JOIN FETCH p.files f WHERE b.id = :boardId")
 	Optional<Board> findByIdWithPlaces(@Param("boardId") Long boardId);
 
+	Optional<Board> findById(@Param("id") Long id);
+
 	@Modifying
 	@Query("UPDATE Board b SET b.viewCount = b.viewCount + 1 WHERE b.id = :id")
 	int incrementViewCount(@Param("id") Long id);

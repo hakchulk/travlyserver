@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.study.travly.board.BoardSaveRequest.BoardPlaceDto;
 import com.study.travly.board.BoardSaveRequest.BoardPlaceFileDto;
 import com.study.travly.board.filter.BoardFilterService;
 import com.study.travly.board.place.BoardPlace;
+import com.study.travly.board.place.BoardPlaceDto;
 import com.study.travly.board.place.file.BoardPlaceFile;
 import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
@@ -62,6 +62,32 @@ public class BoardService {
 		return Optional.of(newBoard);
 	}
 
+	@Transactional
+	public Optional<Board> updateBoardWithAllDetails(Long boardId, BoardUpdateRequest request) {
+		// boardId 로 기존 board 조회
+		Board board = boardRepository.findById(boardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
+
+		board.setTitle(request.getTitle());
+
+		Set<BoardPlace> boardPlaces = new HashSet<>();
+		int placeOrder = 0; // BoardPlace 순번 카운터
+
+		if (request.getPlaces() != null) {
+			for (BoardPlaceDto placeDto : request.getPlaces()) {
+				boardPlaces.add(boardPlaceDto2BoardPlace(placeDto, board, placeOrder++));
+			}
+		}
+
+		board.setPlaces(boardPlaces);
+		// @Transactional 로 인하여 boardRepository.save(board) 는 필요 없음.
+
+		// filter 저장 @Transactional로 인해 saveBoardFilterItems()로 Transaction 으로 처리.
+		boardFilterService.saveBoardFilterItems(boardId, request.getFilterItemIds());
+
+		return Optional.of(board);
+	}
+
 	private BoardPlaceFile boardPlaceFileDto2BoardPlaceFile(BoardPlaceFileDto fileDto, BoardPlace boardPlace,
 			int orderNum) {
 		File file = fileRepository.findById(fileDto.getFileId())
@@ -99,7 +125,6 @@ public class BoardService {
 		return boardPlace;
 	}
 
-	@Transactional
 	public Optional<Board> findByIdWithPlaces(Long id) {
 		Optional<Board> opt = boardRepository.findByIdWithPlaces(id);
 		if (!opt.isPresent())
