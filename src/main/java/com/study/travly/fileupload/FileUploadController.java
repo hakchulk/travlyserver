@@ -1,12 +1,23 @@
 package com.study.travly.fileupload;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.study.travly.file.File;
@@ -51,4 +62,59 @@ public class FileUploadController {
 		return lst;
 	}
 
+	private ResponseEntity<Resource> downloadByFilename(String filename) {
+		try {
+			// 1. 파일 경로 생성
+			Path filePath = Paths.get(fileDir).resolve(filename).normalize();
+			Resource resource = new UrlResource(filePath.toUri());
+
+			// 2. 파일 존재 여부 및 접근성 확인
+			if (resource.exists() && resource.isReadable()) {
+
+				// 3. 파일 MIME 타입 결정 (Content-Type 헤더 설정)
+				String contentType = "application/octet-stream"; // 기본값
+				try {
+					// 실제 파일 타입 결정 로직 (예: .jpg는 image/jpeg)
+					// (실제 프로젝트에서는 Files.probeContentType(filePath) 등을 사용 권장)
+					if (filename.toLowerCase().endsWith(".jpg") || filename.toLowerCase().endsWith(".jpeg")) {
+						contentType = MediaType.IMAGE_JPEG_VALUE;
+					} else if (filename.toLowerCase().endsWith(".png")) {
+						contentType = MediaType.IMAGE_PNG_VALUE;
+					} else if (filename.toLowerCase().endsWith(".gif")) {
+						contentType = MediaType.IMAGE_GIF_VALUE;
+					} else if (filename.toLowerCase().endsWith(".webp")) {
+						contentType = "image/webp";
+					}
+				} catch (Exception ex) {
+					// 파일 타입 결정 실패 시 무시
+				}
+
+				// 4. ResponseEntity 구성 및 반환
+				return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+						// Content-Disposition을 'inline'으로 설정하면 브라우저에 표시됩니다.
+						.header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+						.body(resource);
+
+			} else {
+				// 파일이 존재하지 않거나 읽을 수 없는 경우
+				return ResponseEntity.notFound().build();
+			}
+		} catch (MalformedURLException ex) {
+			// 잘못된 URL 구조 예외 처리
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+	@GetMapping("filedownload/{filename}")
+	public ResponseEntity<Resource> downloadFile(@PathVariable("filename") String filename) {
+		return downloadByFilename(filename);
+
+	}
+
+	@GetMapping("filedownload")
+	public ResponseEntity<Resource> downloadFileById(@RequestParam("fileId") Long fileId) {
+		File file = fileService.findById(fileId);
+
+		return downloadByFilename(file.getFilename());
+	}
 }

@@ -29,6 +29,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor // default Constructor
 @AllArgsConstructor
+
 public class Comment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

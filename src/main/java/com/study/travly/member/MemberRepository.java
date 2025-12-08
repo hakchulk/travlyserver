@@ -21,6 +21,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	@Query("UPDATE Member m SET m.notificationCount = m.notificationCount + 1 WHERE m.id = :id")
 	int incrementNotificationCount(@Param("id") Long id);
 
+	@Modifying
+	@Query("UPDATE Member m SET m.notificationCount = 0 WHERE m.id = :id")
+	int initNotificationCount(@Param("id") Long id);
+
 	// AuthUser의 id(UUID)로 Member 검색
 	// findByAuthUser_Id → JPA가 Member 엔티티의 authUser 필드 안에 있는 id를 자동으로 탐색합니다.
 	Optional<Member> findByAuthUser_Id(UUID id);

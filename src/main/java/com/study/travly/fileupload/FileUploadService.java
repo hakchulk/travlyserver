@@ -77,6 +77,12 @@ public class FileUploadService {
 		return lst;
 	}
 
+	public File findById(Long fileId) {
+		File file = fileRepo.findById(fileId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 file.id [%d]", fileId)));
+		return file;
+	}
+
 	public static boolean isImage(String fileName) {
 		String name = fileName.toLowerCase();
 		return name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".gif")
