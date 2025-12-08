@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -28,7 +27,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	boolean existsByNickname(String nickname);
 
-	@Procedure(procedureName = "get_auth_user_by_id")
-	// 마찬가지로 DTO나 Projection을 반환 타입으로 사용해야 합니다.
+	//	Optional<AuthUserProjection> callAuthUserProcedure(@Param("user_uuid") UUID userUuid);
+	//	@Query(value = "select * from get_auth_user_by_id(:user_uuid)", nativeQuery = true)
+	@Query(value = "select id, email from auth.users u where u.id =:user_uuid", nativeQuery = true)
 	Optional<AuthUserProjection> callAuthUserProcedure(@Param("user_uuid") UUID userUuid);
 }

@@ -10,6 +10,9 @@ import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
 import com.study.travly.file.FileRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class MemberService {
 	@Autowired
@@ -76,10 +79,11 @@ public class MemberService {
 
 	@Transactional
 	public Member modifyMember(MemberModifyRequest request) {
-		memberRepository.callAuthUserProcedure(request.getAuthUuid())
+		AuthUserProjection userProj = memberRepository.callAuthUserProcedure(request.getAuthUuid())
 				// 2. Optional 처리: 결과가 없으면 예외 발생
-				.orElseThrow(() -> new BadRequestException("Supabase에 등록되지 않은 인증 사용자 ID입니다: " + request.getAuthUuid()));
+				.orElseThrow(() -> new BadRequestException("등록되지 않은 인증 사용자 uuid입니다: " + request.getAuthUuid()));
 
+		log.info("============== MemberService.modifyMember()" + userProj.getEmail());
 		// 1. AuthUuid를 기반으로 Member 엔티티 조회 시도
 		Member member = memberRepository.findByAuthUser_Id(request.getAuthUuid()).orElse(null);
 
