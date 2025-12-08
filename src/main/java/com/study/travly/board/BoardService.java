@@ -125,6 +125,7 @@ public class BoardService {
 		return boardPlace;
 	}
 
+	@Transactional
 	public Optional<Board> findByIdWithPlaces(Long id) {
 		Optional<Board> opt = boardRepository.findByIdWithPlaces(id);
 		if (!opt.isPresent())
