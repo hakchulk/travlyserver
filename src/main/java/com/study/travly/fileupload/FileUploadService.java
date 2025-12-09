@@ -37,6 +37,19 @@ public class FileUploadService {
 		return fileCreate(dto, thumbSize, thumbSize);
 	}
 
+	public static String getFileExtension(String filename) {
+		// 1. 마지막 점(.)의 인덱스를 찾습니다.
+		int lastDotIndex = filename.lastIndexOf('.');
+
+		// 2. 점이 파일명에 없거나, 점이 맨 앞에만 있는 경우 (숨김 파일 등)
+		if (lastDotIndex == -1 || lastDotIndex == 0) {
+			return ""; // 확장자가 없거나 유효하지 않음
+		}
+
+		// 3. 점을 포한한 문자열(확장자)을 반환합니다.
+		return filename.substring(lastDotIndex);
+	}
+
 	// ret : new filename list
 	public List<File> fileCreate(FileUploadDto dto, int thumbX, int thumbY) throws IOException {
 
@@ -52,7 +65,10 @@ public class FileUploadService {
 		for (MultipartFile file : files) {
 			if (file != null && !file.isEmpty()) {
 				String originalFilename = file.getOriginalFilename();
-				String newName = UUID.randomUUID() + "_" + originalFilename;
+				String ext = getFileExtension(originalFilename);
+
+				// originalFilename를 뒤에 붙이면 파일시스템에 따른 엔코딩 문제가 생길 수 있어서 ext만 붙인다.
+				String newName = UUID.randomUUID() + ext;
 				log.info("----fileUpload() getOriginalFilename() : " + originalFilename);
 				java.io.File folder = new java.io.File(fileDir);
 				if (!folder.exists())

@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,9 +33,9 @@ public class MemberController {
 	}
 
 	@Operation(summary = "게시글 댓글 목록 페이징 조회 (최신순)", description = "member.id 로 댓글 목록을 페이지 단위로 조회합니다. 기본 정렬은 updatedAt 내림차순(최신순)입니다.")
-	@GetMapping("comment")
+	@GetMapping("{memberId}/comment")
 	public Page<CommentListDto> getComments(
-			@Parameter(description = "댓글을 조회할 member.id") @RequestParam("memberId") Long memberId,
+			@Parameter(description = "댓글을 조회할 member.id") @PathVariable("memberId") Long memberId,
 			@RequestParam(name = "size", defaultValue = "5") int size,
 			@RequestParam(name = "page", defaultValue = "0") int page) {
 

@@ -2,6 +2,7 @@ package com.study.travly.fileupload;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.study.travly.file.File;
@@ -55,12 +55,27 @@ public class FileUploadController {
 					// 배열 타입 응답 명시
 					schema = @Schema(implementation = File.class, type = "array")))
 
-	@PostMapping("fileupload")
+	@PostMapping("file")
 	public List<File> fileUpload(@ModelAttribute FileUploadDto req) throws IOException {
 
 		List<File> lst = fileService.fileCreate(req);
 		return lst;
 	}
+
+	// 1. 확장자와 MediaType 값을 매핑하는 Map을 static final로 정의
+	//	private static final Map<String, String> EXTENSION_TO_MEDIA_TYPE = Map.of(".jpg", MediaType.IMAGE_JPEG_VALUE,
+	//			".jpeg", MediaType.IMAGE_JPEG_VALUE, ".png", MediaType.IMAGE_PNG_VALUE, ".gif", MediaType.IMAGE_GIF_VALUE,
+	//			".webp", "image/webp", ".bmp", "image/bmp"
+	//	// 다른 타입이 필요하면 여기에 추가합니다.
+	//	);
+	//
+	//	public String getContentType(String filename) {
+	//		// 1. 파일명에서 확장자를 추출합니다. (이전에 논의된 getFileExtension 메서드 사용)
+	//		String extension = FileUploadService.getFileExtension(filename).toLowerCase();
+	//
+	//		// 2. Map에서 확장자에 해당하는 ContentType을 조회하고, 없으면 null을 반환합니다.
+	//		return EXTENSION_TO_MEDIA_TYPE.get(extension);
+	//	}
 
 	private ResponseEntity<Resource> downloadByFilename(String filename) {
 		try {
@@ -76,17 +91,11 @@ public class FileUploadController {
 				try {
 					// 실제 파일 타입 결정 로직 (예: .jpg는 image/jpeg)
 					// (실제 프로젝트에서는 Files.probeContentType(filePath) 등을 사용 권장)
-					if (filename.toLowerCase().endsWith(".jpg") || filename.toLowerCase().endsWith(".jpeg")) {
-						contentType = MediaType.IMAGE_JPEG_VALUE;
-					} else if (filename.toLowerCase().endsWith(".png")) {
-						contentType = MediaType.IMAGE_PNG_VALUE;
-					} else if (filename.toLowerCase().endsWith(".gif")) {
-						contentType = MediaType.IMAGE_GIF_VALUE;
-					} else if (filename.toLowerCase().endsWith(".webp")) {
-						contentType = "image/webp";
-					}
+					contentType = Files.probeContentType(filePath);
+
 				} catch (Exception ex) {
 					// 파일 타입 결정 실패 시 무시
+
 				}
 
 				// 4. ResponseEntity 구성 및 반환
@@ -105,14 +114,14 @@ public class FileUploadController {
 		}
 	}
 
-	@GetMapping("filedownload/{filename}")
+	@GetMapping("file/{filename}")
 	public ResponseEntity<Resource> downloadFile(@PathVariable("filename") String filename) {
 		return downloadByFilename(filename);
 
 	}
 
-	@GetMapping("filedownload")
-	public ResponseEntity<Resource> downloadFileById(@RequestParam("fileId") Long fileId) {
+	@GetMapping("file/id/{fileId}")
+	public ResponseEntity<Resource> downloadFileById(@PathVariable("fileId") Long fileId) {
 		File file = fileService.findById(fileId);
 
 		return downloadByFilename(file.getFilename());
