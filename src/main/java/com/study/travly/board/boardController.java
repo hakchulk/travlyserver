@@ -1,5 +1,7 @@
 package com.study.travly.board;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,17 @@ public class boardController {
 	@GetMapping("board/{id}")
 	public Optional<Board> boardListView(@PathVariable("id") Long id) {
 		return boardService.findByIdWithPlaces(id);
+	}
+	
+	@GetMapping("board/top3")
+	public List<WeeklyTopBoardDTO> getTop3Boards() {
+	    LocalDateTime end = LocalDateTime.now();
+	    LocalDateTime start = end.minusDays(7);
+
+	    return boardService.getWeeklyTopBoards(start, end)
+	                       .stream()
+	                       .limit(3)  // 상위 3개만 가져오기
+	                       .toList();
 	}
 
 }

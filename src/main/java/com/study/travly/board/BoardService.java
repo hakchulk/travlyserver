@@ -1,21 +1,30 @@
 package com.study.travly.board;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.study.travly.board.BoardSaveRequest.BoardPlaceDto;
 import com.study.travly.board.BoardSaveRequest.BoardPlaceFileDto;
 import com.study.travly.board.filter.BoardFilterService;
+import com.study.travly.board.like.LikeRepository;
 import com.study.travly.board.place.BoardPlace;
 import com.study.travly.board.place.file.BoardPlaceFile;
 import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
 import com.study.travly.file.FileRepository;
+import com.study.travly.filter.item.ItemRepository;
 import com.study.travly.member.Member;
 import com.study.travly.member.MemberRepository;
 
@@ -30,6 +39,10 @@ public class BoardService {
 	private MemberRepository memberRepository; // Member 조회용
 	@Autowired
 	private FileRepository fileRepository; // File 조회용
+	@Autowired
+	private LikeRepository likeRepository;
+	@Autowired
+	private ItemRepository itemRepository;
 
 	/**
 	 * JSON 요청 하나로 Board, BoardPlace, BoardPlaceFile을 모두 저장합니다.
@@ -110,5 +123,44 @@ public class BoardService {
 		});
 		return opt;
 	}
+
+	public List<WeeklyTopBoardDTO> getWeeklyTopBoards(LocalDateTime start, LocalDateTime end) {
+
+        // 1) 기본 데이터 조회
+        List<WeeklyTopBoardTempDTO> baseList = boardRepository.findWeeklyTopBoards(start, end);
+
+        if (baseList.isEmpty()) return List.of();
+
+        // 2) 게시글 ID 리스트
+        List<Long> ids = baseList.stream().map(WeeklyTopBoardTempDTO::getId).toList();
+
+        // 3) 태그 전체 가져오기
+        List<Object[]> tagRows = itemRepository.findTagsByBoardIds(ids);
+
+        // 4) boardId → tags 매핑
+        Map<Long, List<String>> tagMap = new HashMap<>();
+        for (Object[] row : tagRows) {
+            Long boardId = (Long) row[0];
+            String tag = (String) row[1];
+            tagMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(tag);
+        }
+
+        // 5) 최종 DTO 만들기
+        return baseList.stream()
+                .map(t -> WeeklyTopBoardDTO.builder()
+                        .id(t.getId())
+                        .title(t.getTitle())
+                        .createdAt(t.getCreatedAt().toString())
+                        .viewCount(t.getViewCount())
+                        .memberId(t.getMemberId())
+                        .memberName(t.getMemberName())
+                        .badgeId(t.getBadgeId())
+                        .profileImg(t.getProfileImg())
+                        .likeCount(t.getLikeCount())
+                        .content(t.getContent())
+                        .tags(tagMap.getOrDefault(t.getId(), List.of()))
+                        .build()
+                ).toList();
+    }
 
 }
