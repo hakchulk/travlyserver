@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -163,4 +164,46 @@ public class BoardService {
                 ).toList();
     }
 
+public List<RecentBoardDTO> getRecentBoards() {
+        
+        // 1) 기본 데이터 조회 (Projection 사용)
+        List<RecentBoardTempDTO> baseList = boardRepository.findRecentBoards();
+
+        if (baseList.isEmpty()) return List.of();
+
+        // 2) 게시글 ID 리스트
+        List<Long> ids = baseList.stream().map(RecentBoardTempDTO::getId).toList();
+
+        // 3) 태그 전체 가져오기 (N+1 문제 방지 - Batch 쿼리)
+        // 💡 BoardTagRepository에 findTagsByBoardIds 메서드가 정의되어 있다고 가정
+        List<Object[]> tagRows = itemRepository.findTagsByBoardIds(ids); 
+
+        // 4) boardId → tags 매핑 (Map으로 변환)
+        Map<Long, List<String>> tagMap = new HashMap<>();
+        for (Object[] row : tagRows) {
+            Long boardId = (Long) row[0];
+            String tag = (String) row[1];
+            tagMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(tag);
+        }
+
+        // 5) 최종 RecentBoardDTO 만들기
+        return baseList.stream()
+                .map(t -> RecentBoardDTO.builder() // 💡 최종 DTO 사용
+                        .id(t.getId())
+                        .title(t.getTitle())
+                        .createdAt(t.getCreatedAt().toString()) // LocalDateTime을 String으로 변환
+                        .viewCount(t.getViewCount())
+                        .memberId(t.getMemberId())
+                        .memberName(t.getMemberName())
+                        .badgeId(t.getBadgeId())
+                        .profileImg(t.getProfileImg())
+                        .likeCount(t.getLikeCount())
+                        .content(t.getContent())
+                        .tags(tagMap.getOrDefault(t.getId(), List.of())) // 💡 Map에서 태그 정보 추가
+                        .build()
+                ).toList();
+    }
+
 }
+	
+

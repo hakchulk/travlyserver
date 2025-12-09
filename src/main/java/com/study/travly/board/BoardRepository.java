@@ -49,6 +49,32 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 		    @Param("end") LocalDateTime end
 		);
 
+	@Query(value = """
+		    SELECT 
+		        b.id AS id,
+		        b.title AS title,
+		        b.created_at AS createdAt, 
+		        b.view_count AS viewCount,
+		        m.id AS memberId,
+		        m.name AS memberName,
+		        ba.id AS badgeId,
+		        m.file_id AS profileImage,
+		        (SELECT COUNT(*) FROM likes l WHERE l.board_id = b.id) AS likeCount,
+		        (SELECT bp.content
+		         FROM board_place bp
+		         WHERE bp.board_id = b.id
+		         ORDER BY bp.order_num ASC
+		         LIMIT 1) AS content
+		    FROM board b
+		    JOIN member m ON b.member_id = m.id
+		    LEFT JOIN badge ba ON m.badge_id = ba.id
+		    -- WHERE b.created_at BETWEEN :start AND :end
+		    ORDER BY b.created_at DESC 
+		    LIMIT 9 
+		""", nativeQuery = true)
+	    // 💡 메서드 이름 변경 및 반환 타입 지정
+	    List<RecentBoardTempDTO> findRecentBoards();
+
 	
 	
 }

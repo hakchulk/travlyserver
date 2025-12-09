@@ -78,5 +78,10 @@ public class boardController {
 	                       .limit(3)  // 상위 3개만 가져오기
 	                       .toList();
 	}
+	
+	@GetMapping("board/recent")
+	public List<RecentBoardDTO> getRecentBoards(){
+		return boardService.getRecentBoards().stream().limit(9).toList();
+	}
 
 }
