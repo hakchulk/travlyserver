@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable; // Pageable 임포트
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,10 @@ public class BoardService {
 	private MemberRepository memberRepository; // Member 조회용
 	@Autowired
 	private FileRepository fileRepository; // File 조회용
+
+	public Page<BoardListResponse> getBoardList(BoardListRequest req, Pageable pageable) {
+		return boardRepository.findBoardList(req.getItemIds(), pageable);
+	}
 
 	/**
 	 * JSON 요청 하나로 Board, BoardPlace, BoardPlaceFile을 모두 저장합니다.

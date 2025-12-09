@@ -79,7 +79,7 @@ public class MemberService {
 
 	@Transactional
 	public Member modifyCreateMember(MemberModifyRequest request) {
-		AuthUserProjection userProj = memberRepository.callAuthUserProcedure(request.getAuthUuid())
+		AuthUserProjection userProj = memberRepository.getAuthUserProcedure(request.getAuthUuid())
 				// 2. Optional 처리: 결과가 없으면 예외 발생
 				.orElseThrow(() -> new BadRequestException("등록되지 않은 인증 사용자 uuid입니다: " + request.getAuthUuid()));
 
@@ -98,4 +98,19 @@ public class MemberService {
 		return member;
 	}
 
+	public boolean checkExistence(String email, String nickname) {
+
+		boolean isExist = true;
+
+		if (email != null) {
+			// Service 레이어에서 해당 이메일이 이미 존재하는지 확인
+			isExist = memberRepository.isEmailExist(email);
+		}
+
+		if (nickname != null) {
+			// Service 레이어에서 해당 닉네임이 이미 존재하는지 확인
+			isExist = memberRepository.existsByNickname(nickname);
+		}
+		return isExist;
+	}
 }

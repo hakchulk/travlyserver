@@ -31,8 +31,14 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	boolean existsByNickname(String nickname);
 
-	//	Optional<AuthUserProjection> callAuthUserProcedure(@Param("user_uuid") UUID userUuid);
-	//	@Query(value = "select * from get_auth_user_by_id(:user_uuid)", nativeQuery = true)
 	@Query(value = "select id, email from auth.users u where u.id =:user_uuid", nativeQuery = true)
-	Optional<AuthUserProjection> callAuthUserProcedure(@Param("user_uuid") UUID userUuid);
+	Optional<AuthUserProjection> getAuthUserProcedure(@Param("user_uuid") UUID userUuid);
+
+	@Query(value = "select id, email from auth.users u where u.email =:user_email", nativeQuery = true)
+	Optional<AuthUserProjection> getAuthUserProcedure(@Param("user_email") String user_email);
+
+	@Query(value = "SELECT CASE WHEN COUNT(u.id) > 0 THEN TRUE ELSE FALSE END "
+			+ "FROM auth.users u WHERE u.email = :user_email", nativeQuery = true)
+	boolean isEmailExist(@Param("user_email") String user_email);
+
 }
