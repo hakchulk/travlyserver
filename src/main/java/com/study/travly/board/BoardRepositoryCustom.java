@@ -7,4 +7,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface BoardRepositoryCustom {
 	Page<BoardListResponse> findBoardList(List<Long> itemIds, Pageable pageable);
+
+	Page<BoardListResponse> findBoardListByMemberId(Long memberId, Pageable pageable);
+
+	Page<BoardListResponse> findBookmarkBoardList(Long memberId, Pageable pageable);
 }

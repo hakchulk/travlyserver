@@ -19,6 +19,61 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
 	private final EntityManager em;
 
+	@Override
+	public Page<BoardListResponse> findBoardListByMemberId(Long memberId, Pageable pageable) {
+		String jpql = """
+				SELECT distinct new com.study.travly.board.BoardListResponse(
+					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id
+				)
+				FROM Board b
+				JOIN b.member m
+				LEFT JOIN b.places bp ON bp.orderNum = 0
+				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
+				where m.id = :memberId
+				ORDER BY b.updatedAt DESC""";
+
+		String countJpql = """
+				SELECT COUNT(DISTINCT b.id) FROM Board b
+				WHERE b.member.id = :memberId """;
+
+		return findBoardList(memberId, jpql, countJpql, pageable);
+	}
+
+	public Page<BoardListResponse> findBoardList(Long memberId, String jpql, String countJpql, Pageable pageable) {
+		TypedQuery<BoardListResponse> query = em.createQuery(jpql, BoardListResponse.class);
+		query.setParameter("memberId", memberId);
+		TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+		countQuery.setParameter("memberId", memberId);
+
+		Long total = countQuery.getSingleResult();
+
+		return findBoardList(query, pageable, total);
+	}
+
+	@Override
+	public Page<BoardListResponse> findBookmarkBoardList(Long memberId, Pageable pageable) {
+		String jpql = """
+				SELECT distinct new com.study.travly.board.BoardListResponse(
+					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id
+				)
+				FROM Board b
+				JOIN b.member m
+				join Bookmark bm on bm.member.id = b.member.id and bm.board.id = b.id
+				LEFT JOIN b.places bp ON bp.orderNum = 0
+				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
+				where m.id = :memberId
+				ORDER BY b.updatedAt DESC
+				""";
+
+		String countJpql = """
+				SELECT COUNT(DISTINCT b.id) FROM Board b
+				JOIN b.member m
+				join Bookmark bm on bm.member.id = b.member.id and bm.board.id = b.id
+				WHERE b.member.id = :memberId """;
+
+		return findBoardList(memberId, jpql, countJpql, pageable);
+	}
+
 	private long getTotalCount(List<Long> itemIds) {
 		// 페이징 처리 위한 count 쿼리
 		String countJpql = "SELECT COUNT(DISTINCT b.id) FROM Board b " + (itemIds != null && !itemIds.isEmpty()
@@ -38,13 +93,12 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	public Page<BoardListResponse> findBoardList(List<Long> itemIds, Pageable pageable) {
 		String jpql = """
 				SELECT distinct new com.study.travly.board.BoardListResponse(
-					b.id, b.title, bp.id, bp.title, f.id, b.updatedAt, m.id, m.nickname, m.badge.id
+					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id
 				)
 				FROM Board b
 				JOIN b.member m
 				LEFT JOIN b.places bp ON bp.orderNum = 0
 				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
-				left join bpf.file f
 				""" + (itemIds != null && !itemIds.isEmpty() ? """
 				JOIN BoardFilterItem bi ON bi.board.id = b.id
 				WHERE bi.filterItem.id IN :itemIds
@@ -56,13 +110,17 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			query.setParameter("itemIds", itemIds);
 		}
 
+		Long total = getTotalCount(itemIds);
+
+		return findBoardList(query, pageable, total);
+	}
+
+	public Page<BoardListResponse> findBoardList(TypedQuery<BoardListResponse> query, Pageable pageable, long total) {
+
 		query.setFirstResult((int) pageable.getOffset());
 		query.setMaxResults(pageable.getPageSize());
 
 		List<BoardListResponse> content = query.getResultList();
-
-		// 페이징 처리 위한 count 쿼리
-		Long total = getTotalCount(itemIds);
 
 		// ✅ 3) BoardFilterItem 조회 → filterItemNames 구성
 		List<Long> boardIds = content.stream().map(BoardListResponse::getId).toList();

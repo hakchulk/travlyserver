@@ -35,7 +35,17 @@ public class BoardService {
 
 	public Page<BoardListResponse> getBoardList(BoardListRequest req, Pageable pageable) {
 		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
-		return boardRepository.findBoardList(req.getItemIds(), pageable);
+		return boardRepository.findBoardList(req == null ? null : req.getItemIds(), pageable);
+	}
+
+	public Page<BoardListResponse> getBoardListByMemberId(Long MemberId, Pageable pageable) {
+		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
+		return boardRepository.findBoardListByMemberId(MemberId, pageable);
+	}
+
+	public Page<BoardListResponse> getBookmarkBoardList(Long MemberId, Pageable pageable) {
+		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
+		return boardRepository.findBookmarkBoardList(MemberId, pageable);
 	}
 
 	/**

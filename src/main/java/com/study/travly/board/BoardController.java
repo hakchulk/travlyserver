@@ -42,10 +42,18 @@ public class BoardController {
 	}
 
 	@GetMapping
-	Page<BoardListResponse> getBoardList(@RequestBody BoardListRequest req,
+	Page<BoardListResponse> getBoardList(@RequestBody(required = false) BoardListRequest req,
 			@RequestParam(name = "size", defaultValue = "5") int size,
-			@RequestParam(name = "page", defaultValue = "0") int page) {
+			@RequestParam(name = "page", defaultValue = "0") int page,
+			@RequestParam(name = "memberId", required = false) Long memberId,
+			@RequestParam(name = "bmMemberId", required = false) Long bmMemberId) {
 		Pageable p = PageRequest.of(page, size);
+		if (memberId != null)
+			return boardService.getBoardListByMemberId(memberId, p);
+
+		if (bmMemberId != null)
+			return boardService.getBookmarkBoardList(bmMemberId, p);
+
 		return boardService.getBoardList(req, p);
 	}
 
