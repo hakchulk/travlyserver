@@ -17,7 +17,7 @@ public class BoardListResponse {
 	private String title;
 	private Long placeId;
 	private String placeTitle;
-	private String placeFilename;
+	private Long placeFileId;
 	private LocalDateTime updatedAt;
 	private Long memberId;
 	private String memberNickname;
@@ -25,30 +25,16 @@ public class BoardListResponse {
 	private Long likeCount; // 후처리에서 채움
 	private List<String> filterItemNames; // 후처리에서 채움
 
-	public BoardListResponse(Long id, String title, Long placeId, String placeTitle, String placeFilename,
+	public BoardListResponse(Long id, String title, Long placeId, String placeTitle, Long placeFileId,
 			LocalDateTime updatedAt, Long memberId, String memberNickname, Long badgeId) {
 		this.id = id;
 		this.title = title;
 		this.placeId = placeId;
 		this.placeTitle = placeTitle;
-		this.placeFilename = placeFilename;
+		this.placeFileId = placeFileId;
 		this.updatedAt = updatedAt;
 		this.memberId = memberId;
 		this.memberNickname = memberNickname;
 		this.badgeId = badgeId;
 	}
-
-	//	public BoardListResponse(Long id, String title, Long placeId, String placeTitle, String placeFilename,
-	//			Timestamp updatedAt, Long memberId, String memberNickname, Long badgeId, Long likeCount) {
-	//		this.id = id;
-	//		this.title = title;
-	//		this.placeId = placeId;
-	//		this.placeTitle = placeTitle;
-	//		this.placeFilename = placeFilename;
-	//		this.updatedAt = updatedAt != null ? updatedAt.toLocalDateTime() : null;
-	//		this.memberId = memberId;
-	//		this.memberNickname = memberNickname;
-	//		this.badgeId = badgeId;
-	//		this.likeCount = likeCount;
-	//	}
 }

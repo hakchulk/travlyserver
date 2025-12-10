@@ -38,7 +38,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 	public Page<BoardListResponse> findBoardList(List<Long> itemIds, Pageable pageable) {
 		String jpql = """
 				SELECT distinct new com.study.travly.board.BoardListResponse(
-					b.id, b.title, bp.id, bp.title, f.filename, b.updatedAt, m.id, m.nickname, m.badge.id
+					b.id, b.title, bp.id, bp.title, f.id, b.updatedAt, m.id, m.nickname, m.badge.id
 				)
 				FROM Board b
 				JOIN b.member m
