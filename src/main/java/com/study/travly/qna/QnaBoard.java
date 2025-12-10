@@ -2,8 +2,6 @@ package com.study.travly.qna;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.Comment;
-
 import com.study.travly.file.File;
 import com.study.travly.member.Member;
 
@@ -44,7 +42,6 @@ public class QnaBoard {
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_qna_board__member_id"))
 	private Member member;
 
-	@Comment("첨부 파일")
 	@ManyToOne
 	@JoinColumn(name = "file_id", nullable = false, unique = false, foreignKey = @ForeignKey(name = "fk_qna_board__file_id"))
 	private File file;

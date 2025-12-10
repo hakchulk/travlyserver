@@ -42,6 +42,7 @@ public class BoardFilterService {
 
 		// 2. 기존 BoardFilterItem 관계 모두 삭제 (갱신을 위해)
 		boardFilterItemRepository.deleteByBoardId(board.getId());
+		boardFilterItemRepository.flush(); // 아직 commit 은 되지 않음. 쿼리 순서만 Delete 를 먼저 하게 함.
 
 		// 요청된 item_ids가 비어있으면 삭제만 하고 종료
 		if (request.getItemIds() == null || request.getItemIds().isEmpty()) {

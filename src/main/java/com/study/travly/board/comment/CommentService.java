@@ -1,29 +1,27 @@
 package com.study.travly.board.comment;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.study.travly.board.Board;
+import com.study.travly.board.BoardRepository;
+import com.study.travly.exception.BadRequestException;
+import com.study.travly.member.Member;
+import com.study.travly.member.MemberRepository;
+
 @Service
 @Transactional(readOnly = true)
 public class CommentService {
-
 	@Autowired
 	private CommentRepository commentRepository;
 
-	/**
-	 * 특정 게시글(boardId)에 속한 모든 댓글을 조회합니다.
-	 * @param boardId 댓글을 조회할 게시글의 ID
-	 * @return 해당 게시글의 댓글 목록 (List<Comment>)
-	 */
-	public List<Comment> getCommentsByBoardId(Long boardId) {
-		return commentRepository.findByBoardIdOrderByUpdatedAtDesc(boardId);
-
-	}
+	@Autowired
+	private BoardRepository boardRepository;
+	@Autowired
+	private MemberRepository memberRepository; // Member 조회용
 
 	/**
 	 * 특정 게시글(boardId)에 속한 댓글 목록을 페이징 처리하고 DTO로 변환하여 반환합니다.
@@ -31,28 +29,71 @@ public class CommentService {
 	 * @param pageable 페이징 정보 (페이지 번호, 페이지 크기, 정렬 정보 등)
 	 * @return CommentListDto의 페이징된 목록 (Page<CommentListDto>)
 	 */
-	@Transactional
 	public Page<CommentListDto> getCommentListByBoardId(Long boardId, Pageable pageable) {
+		Board board = boardRepository.findById(boardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
 
 		// 1. Repository를 통해 페이징된 Comment 엔티티 목록을 조회합니다.
 		Page<Comment> commentPage = commentRepository.findByBoardId(boardId, pageable);
 
-		// 2. Page<Comment>를 Page<CommentListDto>로 변환합니다.
-		// Page가 제공하는 map() 메서드를 사용하면 쉽게 변환할 수 있으며, 
-		// Page의 메타 정보(전체 개수, 페이지 수 등)는 자동으로 유지됩니다.
 		return commentPage.map(comment -> {
-			CommentListDto dto = new CommentListDto();
-			dto.setId(comment.getId());
-			dto.setComment(comment.getComment());
-
-			// Member 정보를 DTO 필드에 맞게 매핑 (Member 엔티티에 getNickname()이 있다고 가정)
-			if (comment.getMember() != null) {
-				dto.setMemberId(String.valueOf(comment.getMember().getId()));
-				dto.setNickname(comment.getMember().getNickname());
-			}
-
-			dto.setUpdatedAt(comment.getUpdatedAt());
-			return dto;
+			return comment2CommentListDto(comment);
 		});
 	}
+
+	private CommentListDto comment2CommentListDto(Comment comment) {
+		CommentListDto dto = new CommentListDto();
+		dto.setId(comment.getId());
+		dto.setComment(comment.getComment());
+		dto.setMemberId(comment.getMember().getId());
+		dto.setBoardId(comment.getBoard().getId());
+		dto.setNickname(comment.getMember().getNickname());
+		dto.setUpdatedAt(comment.getUpdatedAt());
+		return dto;
+	}
+
+	@Transactional
+	public Page<CommentListDto> getCommentListByMemberId(Long memberId, Pageable pageable) {
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
+
+		// 1. Repository를 통해 페이징된 Comment 엔티티 목록을 조회합니다.
+		Page<Comment> commentPage = commentRepository.findByMemberId(memberId, pageable);
+		memberRepository.initNotificationCount(memberId);
+		return commentPage.map(comment -> {
+			return comment2CommentListDto(comment);
+		});
+	}
+
+	@Transactional
+	public CommentResponse create(CommentRequest req) {
+		Member member = memberRepository.findById(req.getMemberId())
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", req.getMemberId())));
+
+		Board board = boardRepository.findById(req.getBoardId())
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", req.getBoardId())));
+
+		boolean b = commentRepository.existsByBoardIdAndMemberId(req.getBoardId(), req.getMemberId());
+		if (b)
+			throw new BadRequestException(String.format("Comment 에 board.id [%d], member.id [%d] 가 이미 존재 합니다.",
+					req.getBoardId(), req.getMemberId()));
+
+		Comment comment = new Comment(null, board, member, req.getComment(), null, null);
+		commentRepository.save(comment);
+		CommentResponse ret = new CommentResponse(comment.getId(), req.getBoardId(), req.getMemberId(),
+				req.getComment(), comment.getCreatedAt());
+
+		// 멤버의 알림을 증가시킨다.
+		memberRepository.incrementNotificationCount(board.getMember().getId());
+		return ret;
+	}
+
+	@Transactional
+	public void delete(Long commentId) {
+		Comment comment = commentRepository.findById(commentId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 comment.id [%d]", commentId)));
+
+		commentRepository.delete(comment);
+	}
+
 }

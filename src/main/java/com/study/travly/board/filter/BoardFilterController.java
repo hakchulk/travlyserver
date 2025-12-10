@@ -18,13 +18,13 @@ public class BoardFilterController {
 	/*
 	 * 예) { "boardId": 7, "itemIds": [4,5,7] }
 	 */
-	@PostMapping("boardfilter")
+	@PostMapping("board/filter")
 	public void saveBoardFilters(@RequestBody BoardFilterItemsSaveRequest req) {
 		boardFilterService.saveBoardFilterItems(req);
 	}
 
-	@GetMapping("boardfilter/{board_id}")
-	public List<BoardFilterItemResponseDto> getBoardfilters(@PathVariable("board_id") Long board_id) {
-		return boardFilterService.findByBoardId(board_id);
+	@GetMapping("board/{boardId}/filter")
+	public List<BoardFilterItemResponseDto> getBoardfilters(@PathVariable("boardId") Long boardId) {
+		return boardFilterService.findByBoardId(boardId);
 	}
 }

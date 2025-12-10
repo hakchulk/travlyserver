@@ -8,7 +8,8 @@ import lombok.Data;
 public class CommentListDto {
 	private Long id;
 	private String comment;
-	private String memberId;
+	private Long memberId;
+	private Long boardId;
 	private String nickname;
 	private LocalDateTime updatedAt;
 }

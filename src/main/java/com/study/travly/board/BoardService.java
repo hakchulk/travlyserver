@@ -11,16 +11,21 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+<<<<<<< HEAD
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+=======
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable; // Pageable 임포트
+>>>>>>> dev
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.study.travly.board.BoardSaveRequest.BoardPlaceDto;
 import com.study.travly.board.BoardSaveRequest.BoardPlaceFileDto;
 import com.study.travly.board.filter.BoardFilterService;
 import com.study.travly.board.like.LikeRepository;
 import com.study.travly.board.place.BoardPlace;
+import com.study.travly.board.place.BoardPlaceDto;
 import com.study.travly.board.place.file.BoardPlaceFile;
 import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
@@ -45,8 +50,16 @@ public class BoardService {
 	@Autowired
 	private ItemRepository itemRepository;
 
+<<<<<<< HEAD
 	private final String IMAGE_BASE_URL = "http://localhost:8080/api/travly/file/";
 	
+=======
+	public Page<BoardListResponse> getBoardList(BoardListRequest req, Pageable pageable) {
+		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
+		return boardRepository.findBoardList(req.getItemIds(), pageable);
+	}
+
+>>>>>>> dev
 	/**
 	 * JSON 요청 하나로 Board, BoardPlace, BoardPlaceFile을 모두 저장합니다.
 	 */
@@ -76,6 +89,32 @@ public class BoardService {
 		boardFilterService.saveBoardFilterItems(newBoard.getId(), request.getFilterItemIds());
 		// CascadeType.PERSIST 설정 덕분에 BoardPlace와 BoardPlaceFile도 함께 DB에 저장됩니다.
 		return Optional.of(newBoard);
+	}
+
+	@Transactional
+	public Optional<Board> updateBoardWithAllDetails(Long boardId, BoardUpdateRequest request) {
+		// boardId 로 기존 board 조회
+		Board board = boardRepository.findById(boardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
+
+		board.setTitle(request.getTitle());
+
+		Set<BoardPlace> boardPlaces = new HashSet<>();
+		int placeOrder = 0; // BoardPlace 순번 카운터
+
+		if (request.getPlaces() != null) {
+			for (BoardPlaceDto placeDto : request.getPlaces()) {
+				boardPlaces.add(boardPlaceDto2BoardPlace(placeDto, board, placeOrder++));
+			}
+		}
+
+		board.setPlaces(boardPlaces);
+		// @Transactional 로 인하여 boardRepository.save(board) 는 필요 없음.
+
+		// filter 저장 @Transactional로 인해 saveBoardFilterItems()로 Transaction 으로 처리.
+		boardFilterService.saveBoardFilterItems(boardId, request.getFilterItemIds());
+
+		return Optional.of(board);
 	}
 
 	private BoardPlaceFile boardPlaceFileDto2BoardPlaceFile(BoardPlaceFileDto fileDto, BoardPlace boardPlace,

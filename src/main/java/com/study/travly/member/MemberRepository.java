@@ -1,5 +1,8 @@
 package com.study.travly.member;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +20,25 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 	@Modifying
 	@Query("UPDATE Member m SET m.notificationCount = m.notificationCount + 1 WHERE m.id = :id")
 	int incrementNotificationCount(@Param("id") Long id);
+
+	@Modifying
+	@Query("UPDATE Member m SET m.notificationCount = 0 WHERE m.id = :id")
+	int initNotificationCount(@Param("id") Long id);
+
+	// AuthUser의 id(UUID)로 Member 검색
+	// findByAuthUser_Id → JPA가 Member 엔티티의 authUser 필드 안에 있는 id를 자동으로 탐색합니다.
+	Optional<Member> findByAuthUser_Id(UUID id);
+
+	boolean existsByNickname(String nickname);
+
+	@Query(value = "select id, email from auth.users u where u.id =:user_uuid", nativeQuery = true)
+	Optional<AuthUserProjection> getAuthUserProcedure(@Param("user_uuid") UUID userUuid);
+
+	@Query(value = "select id, email from auth.users u where u.email =:user_email", nativeQuery = true)
+	Optional<AuthUserProjection> getAuthUserProcedure(@Param("user_email") String user_email);
+
+	@Query(value = "SELECT CASE WHEN COUNT(u.id) > 0 THEN TRUE ELSE FALSE END "
+			+ "FROM auth.users u WHERE u.email = :user_email", nativeQuery = true)
+	boolean isEmailExist(@Param("user_email") String user_email);
+
 }

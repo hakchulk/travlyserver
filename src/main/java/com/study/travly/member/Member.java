@@ -22,18 +22,20 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "member", uniqueConstraints = {
-		@UniqueConstraint(name = "UK_member__auth_uuid", columnNames = { "auth_uuid" }),
-		@UniqueConstraint(name = "UK_member__nickname", columnNames = { "nickname" }) })
+		@UniqueConstraint(name = "UK_member__auth_uuid", columnNames = { "auth_uuid" } // DB 컬럼 이름
+		) })
 @Getter
 @Setter
 @NoArgsConstructor // default Constructor
 @AllArgsConstructor
+@Builder
 public class Member {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,7 +54,7 @@ public class Member {
 	@Comment("자기 소기")
 	private String introduction;
 
-	@Comment("코멘트 알림 갯수. 0이면 알림 없음")
+	@Comment("코멘트 알림 갯수")
 	@Column(nullable = false)
 	@ColumnDefault("0")
 	private int notificationCount;
