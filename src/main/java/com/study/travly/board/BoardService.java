@@ -34,6 +34,7 @@ public class BoardService {
 	private FileRepository fileRepository; // File 조회용
 
 	public Page<BoardListResponse> getBoardList(BoardListRequest req, Pageable pageable) {
+		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
 		return boardRepository.findBoardList(req.getItemIds(), pageable);
 	}
 

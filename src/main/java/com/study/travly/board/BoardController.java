@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,7 +45,7 @@ public class BoardController {
 	Page<BoardListResponse> getBoardList(@RequestBody BoardListRequest req,
 			@RequestParam(name = "size", defaultValue = "5") int size,
 			@RequestParam(name = "page", defaultValue = "0") int page) {
-		Pageable p = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+		Pageable p = PageRequest.of(page, size);
 		return boardService.getBoardList(req, p);
 	}
 

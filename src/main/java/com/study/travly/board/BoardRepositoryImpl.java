@@ -19,16 +19,36 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
 	private final EntityManager em;
 
+	private long getTotalCount(List<Long> itemIds) {
+		// 페이징 처리 위한 count 쿼리
+		String countJpql = "SELECT COUNT(DISTINCT b.id) FROM Board b " + (itemIds != null && !itemIds.isEmpty()
+				? "JOIN BoardFilterItem bi ON bi.board.id = b.id WHERE bi.filterItem.id IN :itemIds "
+				: "");
+
+		TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+
+		if (itemIds != null && !itemIds.isEmpty()) {
+			countQuery.setParameter("itemIds", itemIds);
+		}
+
+		return countQuery.getSingleResult();
+	}
+
 	@Override
 	public Page<BoardListResponse> findBoardList(List<Long> itemIds, Pageable pageable) {
-		String jpql = "SELECT new com.study.travly.board.BoardListResponse("
-				+ "b.id, b.title, bp.id, bp.title, f.file.filename, b.updatedAt, " + "m.id, m.nickname, m.badge.id) "
-				+ "FROM Board b " + "JOIN b.member m " + "LEFT JOIN b.places bp ON bp.orderNum = 1 "
-				+ "LEFT JOIN bp.files f ON f.orderNum = 1 "
-				+ (itemIds != null && !itemIds.isEmpty()
-						? "JOIN BoardFilterItem bi ON bi.board.id = b.id " + "JOIN Item i ON i.id = bi.filterItem.id "
-								+ "WHERE i.id IN :itemIds "
-						: "");
+		String jpql = """
+				SELECT distinct new com.study.travly.board.BoardListResponse(
+					b.id, b.title, bp.id, bp.title, f.filename, b.updatedAt, m.id, m.nickname, m.badge.id
+				)
+				FROM Board b
+				JOIN b.member m
+				LEFT JOIN b.places bp ON bp.orderNum = 0
+				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
+				left join bpf.file f
+				""" + (itemIds != null && !itemIds.isEmpty() ? """
+				JOIN BoardFilterItem bi ON bi.board.id = b.id
+				WHERE bi.filterItem.id IN :itemIds
+				""" : "") + "ORDER BY b.updatedAt DESC";
 
 		TypedQuery<BoardListResponse> query = em.createQuery(jpql, BoardListResponse.class);
 
@@ -41,30 +61,21 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
 		List<BoardListResponse> content = query.getResultList();
 
-		// ✅ 2) count 쿼리 — Like 기반
-		String countJpql = "SELECT COUNT(DISTINCT b.id) FROM Board b " + "LEFT JOIN Like l ON l.board.id = b.id "
-				+ (itemIds != null && !itemIds.isEmpty()
-						? "JOIN BoardFilterItem bi ON bi.board.id = b.id " + "WHERE bi.filterItem.id IN :itemIds "
-						: "");
-
-		TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
-
-		if (itemIds != null && !itemIds.isEmpty()) {
-			countQuery.setParameter("itemIds", itemIds);
-		}
-
-		Long total = countQuery.getSingleResult();
+		// 페이징 처리 위한 count 쿼리
+		Long total = getTotalCount(itemIds);
 
 		// ✅ 3) BoardFilterItem 조회 → filterItemNames 구성
 		List<Long> boardIds = content.stream().map(BoardListResponse::getId).toList();
 
 		if (!boardIds.isEmpty()) {
-			List<Object[]> filterRows = em
-					.createQuery("SELECT bi.board.id, i.name " + "FROM BoardFilterItem bi " + "JOIN bi.filterItem i "
-							+ "WHERE bi.board.id IN :ids", Object[].class)
-					.setParameter("ids", boardIds).getResultList();
+			List<Object[]> filterRows = em.createQuery("""
+					SELECT bi.board.id, i.name
+						FROM BoardFilterItem bi
+						JOIN bi.filterItem i
+						WHERE bi.board.id IN :ids
+					""", Object[].class).setParameter("ids", boardIds).getResultList();
 
-			Map<Long, List<String>> filterMap = filterRows.stream().collect(Collectors.groupingBy(row -> (Long) row[0],
+			Map<Long, List<String>> filterMap = filterRows.stream().collect(Collectors.groupingBy(row -> (Long) row[0], // key 
 					Collectors.mapping(row -> (String) row[1], Collectors.toList())));
 
 			content.forEach(res -> {

@@ -42,4 +42,43 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	 * 필터링 조건이 없을 경우의 전체 조회 메서드 (페이징만 적용)
 	 */
 	Page<Board> findAll(Pageable pageable);
+
+	@Query(value = """
+			WITH RankedPlace AS (
+			    SELECT
+			        bp.id,
+			        bp.board_id,
+			        bp.order_num,
+			        bp.title,
+			        ROW_NUMBER() OVER(PARTITION BY bp.board_id ORDER BY bp.order_num ASC) as rn_place
+			    FROM board_place bp
+			),
+			RankedFile AS (
+			    SELECT
+			        bpf.id,
+			        bpf.board_place_id,
+			        bpf.order_num,
+			        bpf.file_id,
+			        ROW_NUMBER() OVER(PARTITION BY bpf.board_place_id ORDER BY bpf.order_num ASC) as rn_file
+			    FROM board_place_file bpf
+			)
+			SELECT
+			    b.id as id,
+			    b.title as title,
+			    rp.id AS placeId,
+			    rp.title AS placeTitle,
+			    f.filename AS placeFilename,
+			    b.updated_at as updatedAt,
+			    m.id AS memberId,
+			    m.nickname AS memberNickname,
+			    m.badge_id as badgeId,
+			    (SELECT COUNT(*) FROM Likes l WHERE l.board_id = b.id) AS likeCount
+			FROM Board b
+			JOIN member m ON m.id = b.member_id
+			LEFT JOIN RankedPlace rp ON rp.board_id = b.id AND rp.rn_place = 1
+			LEFT JOIN RankedFile rf ON rf.board_place_id = rp.id AND rf.rn_file = 1
+			LEFT JOIN file f ON f.id = rf.file_id
+			ORDER BY b.updated_at DESC
+			""", nativeQuery = true)
+	Page<BoardListResponse> findBoardListWithFirstPlaceAndFile(Pageable pageable);
 }
