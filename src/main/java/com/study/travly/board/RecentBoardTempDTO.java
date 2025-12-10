@@ -13,6 +13,7 @@ public interface RecentBoardTempDTO {
 	    Long getBadgeId();
 	    String getProfileImg();
 
+	    String getCardImg();
 	    Long getLikeCount();   // 중요!
 	    String getContent();
 }

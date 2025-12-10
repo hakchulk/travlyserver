@@ -39,7 +39,8 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 		         ORDER BY bp.order_num ASC
 		         LIMIT 1) AS content,
 		        (
-		            SELECT f.filename
+		            -- ⭐ 썸네일 난수명(f.filename) 대신 파일 ID(f.id)를 가져옵니다.
+		            SELECT f.id AS cardFileId 
 		            FROM board_place bp
 		            JOIN board_place_file bpf ON bp.id = bpf.board_place_id
 		            JOIN file f ON bpf.file_id = f.id
@@ -47,7 +48,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 			            AND f.org_filename IS NOT NULL
 		            ORDER BY bp.order_num ASC, bpf.order_num ASC
 		            LIMIT 1
-		        ) AS cardImg
+		        ) AS cardImg -- AS 별칭은 그대로 cardImg를 사용합니다.
 		    FROM board b
 		    JOIN member m ON b.member_id = m.id
 		    LEFT JOIN badge ba ON m.badge_id = ba.id
