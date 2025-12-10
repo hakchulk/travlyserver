@@ -4,16 +4,18 @@ import java.time.LocalDateTime;
 
 public interface RecentBoardTempDTO {
 	 Long getId();
-	    String getTitle();
-	    LocalDateTime getCreatedAt();
-	    Long getViewCount();
+	 String getTitle();
+	 LocalDateTime getCreatedAt();
+	 Long getViewCount();
 
-	    Long getMemberId();
-	    String getMemberName();
-	    Long getBadgeId();
-	    String getProfileImg();
+	 Long getMemberId();
+	 String getMemberName();
+	 Long getBadgeId();
+	 
+	 Long getProfileImg();
 
-	    String getCardImg();
-	    Long getLikeCount();   // 중요!
-	    String getContent();
+	 Long getCardImg();
+	 
+	 Long getLikeCount();
+	 String getContent();
 }

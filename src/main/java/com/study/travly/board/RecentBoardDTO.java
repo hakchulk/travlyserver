@@ -20,7 +20,7 @@ public class RecentBoardDTO {
 	private Long likeCount;
 	private Long viewCount;
 	
-	private long memberId;
+	private Long memberId;
 	private String memberName;
 	private Long badgeId;
 	private String profileImg;

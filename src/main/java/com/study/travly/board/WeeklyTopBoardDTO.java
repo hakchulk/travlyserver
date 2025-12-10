@@ -28,7 +28,7 @@ public class WeeklyTopBoardDTO {
 	private Long badgeId;
 	private String profileImg;
 	
-	private Long cardImg;
+	private String cardImg;
 	private List<String> tags;
 	private String content;
 }

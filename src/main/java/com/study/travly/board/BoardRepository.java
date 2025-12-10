@@ -78,21 +78,33 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 		        m.id AS memberId,
 		        m.name AS memberName,
 		        ba.id AS badgeId,
-		        m.file_id AS profileImage,
+		        
+                m.file_id AS profileImg, -- ⭐ 쿼리 별칭을 DTO 필드명(profileImg)과 일치시킵니다.
+                
 		        (SELECT COUNT(*) FROM likes l WHERE l.board_id = b.id) AS likeCount,
 		        (SELECT bp.content
 		         FROM board_place bp
 		         WHERE bp.board_id = b.id
 		         ORDER BY bp.order_num ASC
-		         LIMIT 1) AS content
+		         LIMIT 1) AS content,
+                (
+                    -- ⭐ 게시글 대표 이미지 ID를 가져오는 서브 쿼리 추가
+                    SELECT f.id AS cardFileId 
+                    FROM board_place bp
+                    JOIN board_place_file bpf ON bp.id = bpf.board_place_id
+                    JOIN file f ON bpf.file_id = f.id
+                    WHERE bp.board_id = b.id
+                        AND f.org_filename IS NOT NULL
+                    ORDER BY bp.order_num ASC, bpf.order_num ASC
+                    LIMIT 1
+                ) AS cardImg -- ⭐ DTO 필드명(cardImg)과 일치시킵니다.
+                
 		    FROM board b
 		    JOIN member m ON b.member_id = m.id
 		    LEFT JOIN badge ba ON m.badge_id = ba.id
-		    -- WHERE b.created_at BETWEEN :start AND :end
 		    ORDER BY b.created_at DESC 
 		    LIMIT 9 
 		""", nativeQuery = true)
-	    // 💡 메서드 이름 변경 및 반환 타입 지정
 	    List<RecentBoardTempDTO> findRecentBoards();
 
 	

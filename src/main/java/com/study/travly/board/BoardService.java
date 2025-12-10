@@ -11,13 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-<<<<<<< HEAD
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-=======
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable; // Pageable 임포트
->>>>>>> dev
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +27,7 @@ import com.study.travly.board.place.file.BoardPlaceFile;
 import com.study.travly.exception.BadRequestException;
 import com.study.travly.file.File;
 import com.study.travly.file.FileRepository;
+import com.study.travly.file.FileService;
 import com.study.travly.filter.item.ItemRepository;
 import com.study.travly.member.Member;
 import com.study.travly.member.MemberRepository;
@@ -49,17 +47,16 @@ public class BoardService {
 	private LikeRepository likeRepository;
 	@Autowired
 	private ItemRepository itemRepository;
+	@Autowired
+	private FileService fileService;
 
-<<<<<<< HEAD
 	private final String IMAGE_BASE_URL = "http://localhost:8080/api/travly/file/";
 	
-=======
 	public Page<BoardListResponse> getBoardList(BoardListRequest req, Pageable pageable) {
 		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
 		return boardRepository.findBoardList(req.getItemIds(), pageable);
 	}
 
->>>>>>> dev
 	/**
 	 * JSON 요청 하나로 Board, BoardPlace, BoardPlaceFile을 모두 저장합니다.
 	 */
@@ -170,113 +167,185 @@ public class BoardService {
 	//주간 인기글 TOP3
 	public List<WeeklyTopBoardDTO> getWeeklyTopBoards(LocalDateTime start, LocalDateTime end) {
 
-        // 1) 기본 데이터 조회
-        List<WeeklyTopBoardTempDTO> baseList = boardRepository.findWeeklyTopBoards(start, end);
+        // 1) 기본 데이터 조회 (DB에서 TempDTO 형태로 파일 ID를 포함하여 가져옴)
+		List<WeeklyTopBoardTempDTO> baseList = boardRepository.findWeeklyTopBoards(start, end);
 
-        if (baseList.isEmpty()) return List.of();
+	    if (baseList.isEmpty()) return List.of();
 
-        // 2) 게시글 ID 리스트
-        List<Long> ids = baseList.stream().map(WeeklyTopBoardTempDTO::getId).toList();
+	    // 2) 게시글 ID 리스트 추출
+	    List<Long> ids = baseList.stream().map(WeeklyTopBoardTempDTO::getId).toList();
 
-        // 3) 태그 전체 가져오기
-        List<Object[]> tagRows = itemRepository.findTagsByBoardIds(ids);
+	    // 3) 태그 전체 가져오기 (성능을 위해 한 번에 조회)
+	    List<Object[]> tagRows = itemRepository.findTagsByBoardIds(ids);
 
-        // 4) boardId → tags 매핑
-        Map<Long, List<String>> tagMap = new HashMap<>();
-        for (Object[] row : tagRows) {
-            Long boardId = (Long) row[0];
-            String tag = (String) row[1];
-            tagMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(tag);
-        }
+	    // 4) boardId → tags 매핑 Map 생성
+	    Map<Long, List<String>> tagMap = new HashMap<>();
+	    for (Object[] row : tagRows) {
+	        Long boardId = (Long) row[0];
+	        String tag = (String) row[1];
+	        tagMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(tag);
+	    }
 
-        // 5) 최종 DTO 만들기
-        
+	 // 5) 최종 DTO 만들기 (TempDTO -> DTO 변환 및 URL 생성)
+	    return baseList.stream()
+	            .map(t ->{ 
+	                
+	                // ===========================================
+	                // 1. 게시글 대표 이미지 (cardImg) URL 생성 로직 (⭐ 원본 파일명 사용으로 수정)
+	                // ===========================================
+	                Long cardFileId = t.getCardImg();
+	                String cardImgUrl = null; 
 
-        
-        return baseList.stream()
-                .map(t ->{ 
-                    String originalFileNameFromDB = t.getCardImg();
-                    
-                    String cardImgUrl = null; // 최종 URL을 담을 변수 선언
+	                if (cardFileId != null) {
+	                    String originalFileNameFromDB = fileService.getFilenameById(cardFileId); 
+	                    
+	                    if (originalFileNameFromDB != null) {
+	                        
+	                        // ⭐⭐⭐ 핵심 수정: 썸네일 관련 로직 제거 ⭐⭐⭐
+	                        // 1. Base Name 추출 로직 불필요
+	                        // 2. t_ 접두사와 .jpg 확장자 추가 불필요
+	                        
+	                        // 난수 파일명 전체(원본 파일의 확장자 포함)를 바로 사용합니다.
+	                    	cardImgUrl = IMAGE_BASE_URL + originalFileNameFromDB; 
+	                    }
+	                }
 
-                    // ⭐ Null 체크 추가: 파일명이 null이 아닐 때만 변환 로직 실행
-                    if (originalFileNameFromDB != null) {
-                        
-                        // 1. 원본 파일명에서 확장자 부분 제거 (Base Name 추출)
-                        int lastDot = originalFileNameFromDB.lastIndexOf('.');
-                        String fileNameBase;
-                        
-                        if (lastDot > 0) {
-                            fileNameBase = originalFileNameFromDB.substring(0, lastDot); 
-                        } else {
-                            // 확장자가 없는 경우 (예외적인 상황)
-                            fileNameBase = originalFileNameFromDB;
-                        }
-                    	
-                    	// 2. 썸네일 접두사와 최종 확장자(.jpg)를 붙여 실제 URL 생성
-                    	String actualThumbnailFileName = "t_" + fileNameBase + ".jpg"; 
-                    	
-                    	cardImgUrl = IMAGE_BASE_URL + actualThumbnailFileName; 
-                    }
-                    
-                	return WeeklyTopBoardDTO.builder()
-                        .id(t.getId())
-                        .title(t.getTitle())
-                        .createdAt(t.getCreatedAt().toString())
-                        .viewCount(t.getViewCount())
-                        .memberId(t.getMemberId())
-                        .memberName(t.getMemberName())
-                        .badgeId(t.getBadgeId())
-                        .profileImg(t.getProfileImg())
-                        .likeCount(t.getLikeCount())
-                        .content(t.getContent())
-                        .tags(tagMap.getOrDefault(t.getId(), List.of()))
-                        .cardImg(cardImgUrl) // ⭐ 수정된 .jpg URL을 전달합니다.
-                        .build();
-                }).toList();
-    }
+	                // ===========================================
+	                // 2. 회원 프로필 이미지 (profileImg) URL 생성 로직 (썸네일 유지)
+	                // ===========================================
+	                Long profileFileId = t.getProfileImg();
+	                String profileImgUrl = null;
+
+	                if (profileFileId != null) {
+	                    
+	                    String originalProfileFileName = fileService.getFilenameById(profileFileId); 
+	                    
+	                    if (originalProfileFileName != null) {
+	                        
+	                        // 썸네일 규칙을 적용하기 위해 Base Name 추출은 그대로 유지합니다.
+	                        int lastDot = originalProfileFileName.lastIndexOf('.');
+	                        String fileNameBase = (lastDot > 0) 
+	                                ? originalProfileFileName.substring(0, lastDot) 
+	                                : originalProfileFileName;
+		                    
+		                    // 썸네일 규칙 적용: t_ 접두사와 .jpg 확장자 유지
+		                    String actualThumbnailFileName = "t_" + fileNameBase + ".jpg"; 
+		                    
+		                    profileImgUrl = IMAGE_BASE_URL + actualThumbnailFileName; 
+	                    }
+	                }
+
+	                // ===========================================
+	                // 3. 최종 DTO 빌더
+	                // ===========================================
+	            	return WeeklyTopBoardDTO.builder()
+	                    .id(t.getId())
+	                    .title(t.getTitle())
+	                    .createdAt(t.getCreatedAt().toString())
+	                    .viewCount(t.getViewCount())
+	                    .memberId(t.getMemberId())
+	                    .memberName(t.getMemberName())
+	                    .badgeId(t.getBadgeId())
+	                    .profileImg(profileImgUrl) // ⭐ 변환된 프로필 URL
+	                    .likeCount(t.getLikeCount())
+	                    .content(t.getContent())
+	                    .tags(tagMap.getOrDefault(t.getId(), List.of()))
+	                    .cardImg(cardImgUrl) // ⭐ 변환된 대표 이미지 URL
+	                    .build();
+	            })
+	            // List<WeeklyTopBoardDTO>로 최종 변환
+	            .collect(Collectors.toList()); 
+	}
+
 
 	
 	//최근 게시글 9항목
 	public List<RecentBoardDTO> getRecentBoards() {
-        
-        // 1) 기본 데이터 조회 (Projection 사용)
-        List<RecentBoardTempDTO> baseList = boardRepository.findRecentBoards();
+    
+    // 1) 기본 데이터 조회
+    List<RecentBoardTempDTO> baseList = boardRepository.findRecentBoards();
 
-        if (baseList.isEmpty()) return List.of();
+    if (baseList.isEmpty()) return List.of();
 
-        // 2) 게시글 ID 리스트
-        List<Long> ids = baseList.stream().map(RecentBoardTempDTO::getId).toList();
+    // 2) 게시글 ID 리스트
+    List<Long> ids = baseList.stream().map(RecentBoardTempDTO::getId).toList();
 
-        // 3) 태그 전체 가져오기 (N+1 문제 방지 - Batch 쿼리)
-        // 💡 BoardTagRepository에 findTagsByBoardIds 메서드가 정의되어 있다고 가정
-        List<Object[]> tagRows = itemRepository.findTagsByBoardIds(ids); 
+    // 3) 태그 전체 가져오기
+    List<Object[]> tagRows = itemRepository.findTagsByBoardIds(ids); 
 
-        // 4) boardId → tags 매핑 (Map으로 변환)
-        Map<Long, List<String>> tagMap = new HashMap<>();
-        for (Object[] row : tagRows) {
-            Long boardId = (Long) row[0];
-            String tag = (String) row[1];
-            tagMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(tag);
-        }
+    // 4) boardId → tags 매핑 (⭐ Map 생성 로직 추가)
+    Map<Long, List<String>> tagMap = new HashMap<>();
+    for (Object[] row : tagRows) {
+        // Object[]에서 Long과 String으로 안전하게 형변환 (타입은 DB/JPA 설정에 따라 달라질 수 있음)
+        Long boardId = (Long) row[0]; 
+        String tag = (String) row[1];
+        tagMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(tag);
+    }
 
-        // 5) 최종 RecentBoardDTO 만들기
-        return baseList.stream()
-                .map(t -> RecentBoardDTO.builder() // 💡 최종 DTO 사용
+    // 5) 최종 RecentBoardDTO 만들기 (URL 변환 로직 포함)
+    return baseList.stream()
+            .map(t -> {
+                
+                // ===========================================
+                // 1. 게시글 대표 이미지 (cardImg) URL 생성 (썸네일)
+                // ===========================================
+                Long cardFileId = t.getCardImg();
+                String cardImgUrl = null; 
+
+                if (cardFileId != null) {
+                    String originalFileNameFromDB = fileService.getFilenameById(cardFileId); 
+                    
+                    if (originalFileNameFromDB != null) {
+                        int lastDot = originalFileNameFromDB.lastIndexOf('.');
+                        String fileNameBase = (lastDot > 0) ? originalFileNameFromDB.substring(0, lastDot) : originalFileNameFromDB;
+                        
+                        String actualThumbnailFileName = "t_" + fileNameBase + ".jpg"; 
+                        cardImgUrl = IMAGE_BASE_URL + actualThumbnailFileName; 
+                    }
+                }
+
+                // ===========================================
+                // 2. 회원 프로필 이미지 (profileImg) URL 생성 (썸네일)
+                // ===========================================
+                Long profileFileId = t.getProfileImg();
+                String profileImgUrl = null;
+
+                if (profileFileId != null) {
+                    
+                    String originalProfileFileName = fileService.getFilenameById(profileFileId); 
+                    
+                    if (originalProfileFileName != null) {
+                        
+                        int lastDot = originalProfileFileName.lastIndexOf('.');
+                        String fileNameBase = (lastDot > 0) ? originalProfileFileName.substring(0, lastDot) : originalProfileFileName;
+                        
+                        String actualThumbnailFileName = "t_" + fileNameBase + ".jpg"; 
+                        profileImgUrl = IMAGE_BASE_URL + actualThumbnailFileName; 
+                    }
+                }
+
+                // ===========================================
+                // 3. 최종 DTO 빌더 (⭐ 누락된 필드 매핑 추가)
+                // ===========================================
+                return RecentBoardDTO.builder()
                         .id(t.getId())
                         .title(t.getTitle())
-                        .createdAt(t.getCreatedAt().toString()) // LocalDateTime을 String으로 변환
+                        .createdAt(t.getCreatedAt().toString()) // LocalDateTime -> String
                         .viewCount(t.getViewCount())
                         .memberId(t.getMemberId())
                         .memberName(t.getMemberName())
                         .badgeId(t.getBadgeId())
-                        .profileImg(t.getProfileImg())
                         .likeCount(t.getLikeCount())
                         .content(t.getContent())
-                        .tags(tagMap.getOrDefault(t.getId(), List.of())) // 💡 Map에서 태그 정보 추가
-                        .build()
-                ).toList();
-    }
+                        // ⭐ 변환된 URL 사용
+                        .profileImg(profileImgUrl) 
+                        .cardImg(cardImgUrl)       
+                        // ⭐ 태그 정보 매핑
+                        .tags(tagMap.getOrDefault(t.getId(), List.of()))
+                        .build();
+            })
+            .collect(Collectors.toList()); // ⭐ List<RecentBoardDTO> 반환 타입 지정
+}
 
 }
 	
