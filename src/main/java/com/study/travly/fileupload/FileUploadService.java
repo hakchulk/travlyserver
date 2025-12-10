@@ -62,9 +62,23 @@ public class FileUploadService {
 
 				Files.write(Paths.get(fileDir + '/' + newName), fileData); // 원본 저장
 
-				if (isImage(originalFilename))
-					Thumbnails.of(new ByteArrayInputStream(fileData)).size(thumbX, thumbY).outputFormat("jpg")
-							.toFile(fileDir + "/t_" + newName); // thumbnail 저장
+				if (isImage(originalFilename)) {
+                    // ⭐ 1. 새 파일명에서 기존 확장자 제거
+                    String thumbnailBaseName = newName;
+                    int lastDot = newName.lastIndexOf('.');
+                    if (lastDot > 0) {
+                        thumbnailBaseName = newName.substring(0, lastDot);
+                    }
+                    
+                    // ⭐ 2. 썸네일 저장 시 확장자가 제거된 BaseName 사용
+					Thumbnails.of(new ByteArrayInputStream(fileData))
+                        .size(thumbX, thumbY)
+                        .outputFormat("jpg") // Thumbnails 라이브러리가 여기에 .jpg를 추가할 것입니다.
+                        .toFile(fileDir + "/t_" + thumbnailBaseName); // **.png가 제거된 경로**
+
+                    // ⭐ 3. Service에서 사용할 썸네일 파일명 정의
+                    // 디스크에 저장되는 실제 썸네일 파일명은 "t_" + thumbnailBaseName + ".jpg" 입니다.
+				}
 
 				File fileEntity = File.builder().filename(newName).org_filename(originalFilename).build();
 				File newFileEntity = fileRepo.save(fileEntity);

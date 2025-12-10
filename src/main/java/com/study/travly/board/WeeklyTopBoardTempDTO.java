@@ -14,7 +14,9 @@ public interface WeeklyTopBoardTempDTO {
     String getMemberName();
     Long getBadgeId();
     String getProfileImg();
-
+    
+    String getCardImg();
+    
     Long getLikeCount();   // 중요!
     String getContent();
 }

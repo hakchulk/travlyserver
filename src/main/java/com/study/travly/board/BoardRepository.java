@@ -21,6 +21,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 	@Query("UPDATE Board b SET b.viewCount = b.viewCount + 1 WHERE b.id = :id")
 	int incrementViewCount(@Param("id") Long id);
 
+	//주간 게시글 TOP3
 	@Query(value = """
 		    SELECT 
 		        b.id AS id,
@@ -30,13 +31,23 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 		        m.id AS memberId,
 		        m.name AS memberName,
 		        ba.id AS badgeId,
-		        m.file_id AS profileImage,
+		        m.file_id AS profileImg,
 		        (SELECT COUNT(*) FROM likes l WHERE l.board_id = b.id) AS likeCount,
 		        (SELECT bp.content
 		         FROM board_place bp
 		         WHERE bp.board_id = b.id
 		         ORDER BY bp.order_num ASC
-		         LIMIT 1) AS content
+		         LIMIT 1) AS content,
+		        (
+		            SELECT f.filename
+		            FROM board_place bp
+		            JOIN board_place_file bpf ON bp.id = bpf.board_place_id
+		            JOIN file f ON bpf.file_id = f.id
+		            WHERE bp.board_id = b.id
+			            AND f.org_filename IS NOT NULL
+		            ORDER BY bp.order_num ASC, bpf.order_num ASC
+		            LIMIT 1
+		        ) AS cardImg
 		    FROM board b
 		    JOIN member m ON b.member_id = m.id
 		    LEFT JOIN badge ba ON m.badge_id = ba.id
@@ -49,6 +60,7 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
 		    @Param("end") LocalDateTime end
 		);
 
+	//최근 게시글 9
 	@Query(value = """
 		    SELECT 
 		        b.id AS id,

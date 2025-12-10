@@ -45,6 +45,8 @@ public class BoardService {
 	@Autowired
 	private ItemRepository itemRepository;
 
+	private final String IMAGE_BASE_URL = "http://localhost:8080/api/travly/file/";
+	
 	/**
 	 * JSON 요청 하나로 Board, BoardPlace, BoardPlaceFile을 모두 저장합니다.
 	 */
@@ -124,7 +126,9 @@ public class BoardService {
 		});
 		return opt;
 	}
-
+	
+	
+	//주간 인기글 TOP3
 	public List<WeeklyTopBoardDTO> getWeeklyTopBoards(LocalDateTime start, LocalDateTime end) {
 
         // 1) 기본 데이터 조회
@@ -147,8 +151,36 @@ public class BoardService {
         }
 
         // 5) 최종 DTO 만들기
+        
+
+        
         return baseList.stream()
-                .map(t -> WeeklyTopBoardDTO.builder()
+                .map(t ->{ 
+                    String originalFileNameFromDB = t.getCardImg();
+                    
+                    String cardImgUrl = null; // 최종 URL을 담을 변수 선언
+
+                    // ⭐ Null 체크 추가: 파일명이 null이 아닐 때만 변환 로직 실행
+                    if (originalFileNameFromDB != null) {
+                        
+                        // 1. 원본 파일명에서 확장자 부분 제거 (Base Name 추출)
+                        int lastDot = originalFileNameFromDB.lastIndexOf('.');
+                        String fileNameBase;
+                        
+                        if (lastDot > 0) {
+                            fileNameBase = originalFileNameFromDB.substring(0, lastDot); 
+                        } else {
+                            // 확장자가 없는 경우 (예외적인 상황)
+                            fileNameBase = originalFileNameFromDB;
+                        }
+                    	
+                    	// 2. 썸네일 접두사와 최종 확장자(.jpg)를 붙여 실제 URL 생성
+                    	String actualThumbnailFileName = "t_" + fileNameBase + ".jpg"; 
+                    	
+                    	cardImgUrl = IMAGE_BASE_URL + actualThumbnailFileName; 
+                    }
+                    
+                	return WeeklyTopBoardDTO.builder()
                         .id(t.getId())
                         .title(t.getTitle())
                         .createdAt(t.getCreatedAt().toString())
@@ -160,11 +192,14 @@ public class BoardService {
                         .likeCount(t.getLikeCount())
                         .content(t.getContent())
                         .tags(tagMap.getOrDefault(t.getId(), List.of()))
-                        .build()
-                ).toList();
+                        .cardImg(cardImgUrl) // ⭐ 수정된 .jpg URL을 전달합니다.
+                        .build();
+                }).toList();
     }
 
-public List<RecentBoardDTO> getRecentBoards() {
+	
+	//최근 게시글 9항목
+	public List<RecentBoardDTO> getRecentBoards() {
         
         // 1) 기본 데이터 조회 (Projection 사용)
         List<RecentBoardTempDTO> baseList = boardRepository.findRecentBoards();
