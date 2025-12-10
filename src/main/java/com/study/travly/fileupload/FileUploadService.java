@@ -30,7 +30,7 @@ public class FileUploadService {
 	FileRepository fileRepo;
 
 	public List<File> fileCreate(FileUploadDto dto) throws IOException {
-		return fileCreate(dto, 100, 100);
+		return fileCreate(dto, 200, 200);
 	}
 
 	public List<File> fileCreate(FileUploadDto dto, int thumbSize) throws IOException {
