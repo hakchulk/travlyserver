@@ -109,4 +109,10 @@ public class MemberService {
 		}
 		return isExist;
 	}
+
+	public Member getMember(Long id) {
+		String email = memberRepository.getEmailById(id);
+		return memberRepository.findById(id)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", id)));
+	}
 }

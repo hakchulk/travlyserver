@@ -41,4 +41,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 			+ "FROM auth.users u WHERE u.email = :user_email", nativeQuery = true)
 	boolean isEmailExist(@Param("user_email") String user_email);
 
+	public Optional<Member> findById(Long id);
+
+	@Query(value = """
+			SELECT email
+			FROM public.member m join auth.users u on m.auth_uuid = u.id WHERE m.id = :memberId
+			""", nativeQuery = true)
+	String getEmailById(@Param("memberId") Long memberId);
+
 }

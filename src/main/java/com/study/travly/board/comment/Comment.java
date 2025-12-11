@@ -2,6 +2,9 @@ package com.study.travly.board.comment;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.study.travly.board.Board;
 import com.study.travly.member.Member;
 
@@ -37,6 +40,7 @@ public class Comment {
 
 	@ManyToOne()
 	@JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comment_board_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Board board;
 
 	@ManyToOne()

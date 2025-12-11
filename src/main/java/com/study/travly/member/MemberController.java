@@ -23,10 +23,16 @@ import io.swagger.v3.oas.annotations.Parameter;
 @RestController
 @RequestMapping("member")
 public class MemberController {
+
+	private final MemberRepository memberRepository;
 	@Autowired
 	MemberService memberService;
 	@Autowired
 	private CommentService commentService;
+
+	MemberController(MemberRepository memberRepository) {
+		this.memberRepository = memberRepository;
+	}
 
 	@PostMapping
 	public Member modifyCreateMember(@RequestBody MemberModifyRequest req) {
@@ -56,7 +62,7 @@ public class MemberController {
 	 * @param nickname 확인할 닉네임 (Optional)
 	 * @return 항목의 존재 유무(true/false)를 담은 ResponseEntity
 	 */
-	@GetMapping("/check")
+	@GetMapping("check")
 	public IsExistResponse checkExistence(@RequestParam(name = "email", required = false) String email,
 			@RequestParam(name = "nickname", required = false) String nickname) {
 
@@ -68,4 +74,10 @@ public class MemberController {
 
 		return new IsExistResponse(memberService.checkExistence(email, nickname));
 	}
+
+	@GetMapping("{memberId}")
+	public Member getMember(@PathVariable("memberId") Long memberId) {
+		return memberService.getMember(memberId);
+	}
+
 }

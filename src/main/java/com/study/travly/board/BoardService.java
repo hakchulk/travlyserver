@@ -163,4 +163,11 @@ public class BoardService {
 		return opt;
 	}
 
+	@Transactional
+	public void delete(Long BoardId) {
+		Board comment = boardRepository.findById(BoardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", BoardId)));
+
+		boardRepository.delete(comment);
+	}
 }

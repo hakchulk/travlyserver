@@ -2,6 +2,9 @@ package com.study.travly.board.filter;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.study.travly.board.Board;
 import com.study.travly.filter.item.Item;
 
@@ -36,6 +39,7 @@ public class BoardFilterItem {
 
 	@ManyToOne()
 	@JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(name = "fk_board_filter_item__board_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Board board;
 
 	@ManyToOne()

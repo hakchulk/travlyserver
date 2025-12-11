@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.study.travly.badge.Badge;
 import com.study.travly.file.File;
 
@@ -41,6 +42,7 @@ public class Member {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@JsonIgnore
 	@OneToOne
 	@JoinColumn(name = "auth_uuid", nullable = false, foreignKey = @ForeignKey(name = "fk_member__auth_uuid"))
 	private AuthUser authUser;
@@ -83,4 +85,5 @@ public class Member {
 	public void onUpdatedd() {
 		this.updatedAt = LocalDateTime.now();
 	}
+
 }
