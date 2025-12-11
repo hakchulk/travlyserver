@@ -58,18 +58,18 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 				)
 				FROM Board b
 				JOIN b.member m
-				join Bookmark bm on bm.member.id = b.member.id and bm.board.id = b.id
+				join Bookmark bm on bm.board.id = b.id
 				LEFT JOIN b.places bp ON bp.orderNum = 0
 				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
-				where m.id = :memberId
+				where bm.member.id = :memberId
 				ORDER BY b.updatedAt DESC
 				""";
 
 		String countJpql = """
 				SELECT COUNT(DISTINCT b.id) FROM Board b
 				JOIN b.member m
-				join Bookmark bm on bm.member.id = b.member.id and bm.board.id = b.id
-				WHERE b.member.id = :memberId """;
+				join Bookmark bm on bm.board.id = b.id
+				WHERE bm.member.id = :memberId """;
 
 		return findBoardList(memberId, jpql, countJpql, pageable);
 	}

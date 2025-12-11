@@ -41,20 +41,37 @@ public class BoardController {
 		return boardService.updateBoardWithAllDetails(id, req);
 	}
 
-	@GetMapping
-	Page<BoardListResponse> getBoardList(@RequestBody(required = false) BoardListRequest req,
+	@GetMapping("member/{memberId}")
+	Page<BoardListResponse> getBoardListByMemberId(@PathVariable(name = "memberId") Long memberId,
 			@RequestParam(name = "size", defaultValue = "5") int size,
-			@RequestParam(name = "page", defaultValue = "0") int page,
-			@RequestParam(name = "memberId", required = false) Long memberId,
-			@RequestParam(name = "bmMemberId", required = false) Long bmMemberId) {
+			@RequestParam(name = "page", defaultValue = "0") int page) {
 		Pageable p = PageRequest.of(page, size);
-		if (memberId != null)
-			return boardService.getBoardListByMemberId(memberId, p);
+		return boardService.getBoardListByMemberId(memberId, p);
+	}
 
-		if (bmMemberId != null)
-			return boardService.getBookmarkBoardList(bmMemberId, p);
+	@GetMapping("member/{memberId}/bookmark")
+	Page<BoardListResponse> getBookmarkBoardList(@PathVariable(name = "memberId") Long memberId,
+			@RequestParam(name = "size", defaultValue = "5") int size,
+			@RequestParam(name = "page", defaultValue = "0") int page) {
+		Pageable p = PageRequest.of(page, size);
+		return boardService.getBookmarkBoardList(memberId, p);
+	}
+
+	@PostMapping("search")
+	Page<BoardListResponse> getBoardList(@RequestBody(required = true) BoardListRequest req,
+			@RequestParam(name = "size", defaultValue = "5") int size,
+			@RequestParam(name = "page", defaultValue = "0") int page) {
+		Pageable p = PageRequest.of(page, size);
 
 		return boardService.getBoardList(req, p);
 	}
 
+	@Operation(summary = "게시글 목록 페이징 조회 (최신순)", description = "게시글 전체 목록을 페이지 단위로 조회합니다. 기본 정렬은 updatedAt 내림차순(최신순)입니다.")
+	@GetMapping
+	Page<BoardListResponse> getBoardList(@RequestParam(name = "size", defaultValue = "5") int size,
+			@RequestParam(name = "page", defaultValue = "0") int page) {
+		Pageable p = PageRequest.of(page, size);
+
+		return boardService.getBoardListAll(p);
+	}
 }

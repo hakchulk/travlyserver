@@ -35,7 +35,12 @@ public class BoardService {
 
 	public Page<BoardListResponse> getBoardList(BoardListRequest req, Pageable pageable) {
 		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
-		return boardRepository.findBoardList(req == null ? null : req.getItemIds(), pageable);
+		return boardRepository.findBoardList(req.getItemIds(), pageable);
+	}
+
+	public Page<BoardListResponse> getBoardListAll(Pageable pageable) {
+		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
+		return boardRepository.findBoardList(null, pageable);
 	}
 
 	public Page<BoardListResponse> getBoardListByMemberId(Long MemberId, Pageable pageable) {
