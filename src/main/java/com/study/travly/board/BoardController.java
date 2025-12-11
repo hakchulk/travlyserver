@@ -66,12 +66,13 @@ public class BoardController {
 		return boardService.getBoardList(req, p);
 	}
 
-	@Operation(summary = "게시글 목록 페이징 조회 (최신순)", description = "게시글 전체 목록을 페이지 단위로 조회합니다. 기본 정렬은 updatedAt 내림차순(최신순)입니다.")
+	@Operation(summary = "게시글 전체 목록 조회(최신순)", description = "게시글 전체 목록을 페이지 단위로 조회합니다. 기본 정렬은 updatedAt 내림차순(최신순)입니다.")
 	@GetMapping
 	Page<BoardListResponse> getBoardList(@RequestParam(name = "size", defaultValue = "5") int size,
-			@RequestParam(name = "page", defaultValue = "0") int page) {
+			@RequestParam(name = "page", defaultValue = "0") int page,
+			@RequestParam(name = "orderby", defaultValue = "updated") String orderby) {
 		Pageable p = PageRequest.of(page, size);
 
-		return boardService.getBoardListAll(p);
+		return boardService.getBoardListAll(p, orderby);
 	}
 }

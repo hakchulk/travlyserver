@@ -38,8 +38,11 @@ public class BoardService {
 		return boardRepository.findBoardList(req.getItemIds(), pageable);
 	}
 
-	public Page<BoardListResponse> getBoardListAll(Pageable pageable) {
-		//		return boardRepository.findBoardListWithFirstPlaceAndFile(pageable);
+	public Page<BoardListResponse> getBoardListAll(Pageable pageable, String orderby) {
+		if (orderby.equals("like")) {
+			return boardRepository.findBoardListOrderByLikes(pageable);
+		}
+
 		return boardRepository.findBoardList(null, pageable);
 	}
 

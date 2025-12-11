@@ -11,4 +11,6 @@ public interface BoardRepositoryCustom {
 	Page<BoardListResponse> findBoardListByMemberId(Long memberId, Pageable pageable);
 
 	Page<BoardListResponse> findBookmarkBoardList(Long memberId, Pageable pageable);
+
+	Page<BoardListResponse> findBoardListOrderByLikes(Pageable pageable);
 }

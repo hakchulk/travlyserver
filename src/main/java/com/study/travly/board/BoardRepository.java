@@ -13,6 +13,21 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long>, BoardRepositoryCustom {
+	/*	
+		@Query("""
+				SELECT distinct new com.study.travly.board.BoardListResponse(
+					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id, b.viewCount, f.filename
+					, (SELECT COUNT(l) FROM Like l WHERE l.board.id = b.id) as likeCount
+				)
+				FROM Board b
+				JOIN b.member m
+				LEFT JOIN b.places bp ON bp.orderNum = 0
+				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
+				left join bpf.file f
+				ORDER BY likeCount DESC
+				""")
+		Page<BoardListResponse> findBoardListOrderByLikes(Pageable pageable);
+	*/
 	@Query("SELECT DISTINCT b FROM Board b JOIN FETCH b.places p JOIN FETCH b.member m JOIN FETCH p.files f WHERE b.id = :boardId")
 	Optional<Board> findByIdWithPlaces(@Param("boardId") Long boardId);
 

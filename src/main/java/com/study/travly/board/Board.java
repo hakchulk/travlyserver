@@ -49,7 +49,7 @@ public class Board {
 	private Member member;
 
 	@Comment("조회수")
-	private int viewCount;
+	private Integer viewCount;
 
 	@Column(nullable = false)
 	private LocalDateTime createdAt;

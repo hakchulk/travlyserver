@@ -18,23 +18,42 @@ import lombok.RequiredArgsConstructor;
 public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
 	private final EntityManager em;
+	private final String jpqlBase = """
+			SELECT distinct new com.study.travly.board.BoardListResponse(
+				b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id, b.viewCount, f.filename
+				, (SELECT COUNT(l) FROM Like l WHERE l.board.id = b.id) as likeCount
+			)
+			FROM Board b
+			JOIN b.member m
+			LEFT JOIN b.places bp ON bp.orderNum = 0
+			LEFT JOIN bp.files bpf ON bpf.orderNum = 0
+			left join bpf.file f
+			""";
 
 	@Override
-	public Page<BoardListResponse> findBoardListByMemberId(Long memberId, Pageable pageable) {
-		String jpql = """
-				SELECT distinct new com.study.travly.board.BoardListResponse(
-					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id
-				)
-				FROM Board b
-				JOIN b.member m
-				LEFT JOIN b.places bp ON bp.orderNum = 0
-				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
-				where m.id = :memberId
-				ORDER BY b.updatedAt DESC""";
+	public Page<BoardListResponse> findBoardListOrderByLikes(Pageable pageable) {
+		String jpql = jpqlBase + """
+				ORDER BY likeCount DESC, b.updatedAt DESC
+				""";
 
 		String countJpql = """
 				SELECT COUNT(DISTINCT b.id) FROM Board b
-				WHERE b.member.id = :memberId """;
+				""";
+
+		return findBoardList(jpql, countJpql, pageable);
+	}
+
+	@Override
+	public Page<BoardListResponse> findBoardListByMemberId(Long memberId, Pageable pageable) {
+		String jpql = jpqlBase + """
+				where m.id = :memberId
+				ORDER BY b.updatedAt DESC
+				""";
+
+		String countJpql = """
+				SELECT COUNT(DISTINCT b.id) FROM Board b
+				WHERE b.member.id = :memberId
+				""";
 
 		return findBoardList(memberId, jpql, countJpql, pageable);
 	}
@@ -50,17 +69,18 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 		return findBoardList(query, pageable, total);
 	}
 
+	public Page<BoardListResponse> findBoardList(String jpql, String countJpql, Pageable pageable) {
+		TypedQuery<BoardListResponse> query = em.createQuery(jpql, BoardListResponse.class);
+		TypedQuery<Long> countQuery = em.createQuery(countJpql, Long.class);
+
+		Long total = countQuery.getSingleResult();
+		return findBoardList(query, pageable, total);
+	}
+
 	@Override
 	public Page<BoardListResponse> findBookmarkBoardList(Long memberId, Pageable pageable) {
-		String jpql = """
-				SELECT distinct new com.study.travly.board.BoardListResponse(
-					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id
-				)
-				FROM Board b
-				JOIN b.member m
+		String jpql = jpqlBase + """
 				join Bookmark bm on bm.board.id = b.id
-				LEFT JOIN b.places bp ON bp.orderNum = 0
-				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
 				where bm.member.id = :memberId
 				ORDER BY b.updatedAt DESC
 				""";
@@ -91,15 +111,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
 	@Override
 	public Page<BoardListResponse> findBoardList(List<Long> itemIds, Pageable pageable) {
-		String jpql = """
-				SELECT distinct new com.study.travly.board.BoardListResponse(
-					b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id
-				)
-				FROM Board b
-				JOIN b.member m
-				LEFT JOIN b.places bp ON bp.orderNum = 0
-				LEFT JOIN bp.files bpf ON bpf.orderNum = 0
-				""" + (itemIds != null && !itemIds.isEmpty() ? """
+		String jpql = jpqlBase + (itemIds != null && !itemIds.isEmpty() ? """
 				JOIN BoardFilterItem bi ON bi.board.id = b.id
 				WHERE bi.filterItem.id IN :itemIds
 				""" : "") + "ORDER BY b.updatedAt DESC";
@@ -139,21 +151,6 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			content.forEach(res -> {
 				List<String> names = filterMap.get(res.getId());
 				res.setFilterItemNames(names == null ? List.of() : names);
-			});
-		}
-
-		// ✅ 4) Like 조회 → likeCount 구성
-		if (!boardIds.isEmpty()) {
-			List<Object[]> likeRows = em.createQuery("SELECT l.board.id, COUNT(l.id) " + "FROM Like l "
-					+ "WHERE l.board.id IN :ids " + "GROUP BY l.board.id", Object[].class).setParameter("ids", boardIds)
-					.getResultList();
-
-			Map<Long, Long> likeMap = likeRows.stream()
-					.collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
-
-			content.forEach(res -> {
-				Long count = likeMap.get(res.getId());
-				res.setLikeCount(count == null ? 0L : count);
 			});
 		}
 
