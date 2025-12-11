@@ -22,9 +22,11 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 			SELECT distinct new com.study.travly.board.BoardListResponse(
 				b.id, b.title, bp.id, bp.title, bpf.id, b.updatedAt, m.id, m.nickname, m.badge.id, b.viewCount, f.filename
 				, (SELECT COUNT(l) FROM Like l WHERE l.board.id = b.id) as likeCount
+				, mp.filename, bp.content
 			)
 			FROM Board b
 			JOIN b.member m
+			left join m.profileImage mp
 			LEFT JOIN b.places bp ON bp.orderNum = 0
 			LEFT JOIN bp.files bpf ON bpf.orderNum = 0
 			left join bpf.file f

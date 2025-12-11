@@ -31,7 +31,7 @@ public class MemberService {
 
 		// DTO의 필드를 사용하여 새 Member 엔티티 생성
 		Member member = Member.builder() // @Builder가 Member 엔티티에 추가되었다고 가정
-				.authUser(authUser).name(request.getName()).nickname(request.getNickname())
+				.authUser(authUser).nickname(request.getNickname())
 				.introduction(request.getIntroduction() != null ? request.getIntroduction() : "").badge(defaultBadge)
 				.notificationCount(0) // 기본값 설정
 				.build();
@@ -41,10 +41,6 @@ public class MemberService {
 
 	private Member getUpdatedMember(Member member, MemberModifyRequest request) {
 		// DTO의 정보로 엔티티 업데이트
-		// 이름 수정
-		if (request.getName() != null && !request.getName().trim().isEmpty()) {
-			member.setName(request.getName());
-		}
 
 		// 닉네임 수정 (중복 검사 로직 필요)
 		if (request.getNickname() != null && !request.getNickname().trim().isEmpty()) {

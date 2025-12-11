@@ -23,6 +23,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -71,4 +72,7 @@ public class Board {
 	@OneToMany(mappedBy = "board", cascade = CascadeType.PERSIST)
 	@OrderBy("orderNum ASC")
 	private Set<BoardPlace> places;
+
+	@Transient // 또는 DTO 전달용 임시 필드
+	private Long likeCount;
 }

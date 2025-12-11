@@ -158,6 +158,7 @@ public class BoardService {
 
 		opt.ifPresent(board -> {
 			boardRepository.incrementViewCount(id);
+			board.setLikeCount(boardRepository.getLikeCountByBoardId(id));
 		});
 		return opt;
 	}

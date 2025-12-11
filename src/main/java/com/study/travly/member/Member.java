@@ -46,9 +46,6 @@ public class Member {
 	private AuthUser authUser;
 
 	@Column(nullable = false)
-	private String name;
-
-	@Column(nullable = false)
 	private String nickname;
 
 	@Comment("자기 소기")
