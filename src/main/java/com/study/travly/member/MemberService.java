@@ -70,6 +70,7 @@ public class MemberService {
 				member.setProfileImage(profileImage);
 			}
 		}
+
 		return member;
 	}
 
@@ -91,6 +92,9 @@ public class MemberService {
 			member = getUpdatedMember(member, request);
 		}
 
+		String email = memberRepository.getEmailById(member.getId());
+		member.setEmail(email);
+
 		return member;
 	}
 
@@ -111,8 +115,10 @@ public class MemberService {
 	}
 
 	public Member getMember(Long id) {
-		String email = memberRepository.getEmailById(id);
-		return memberRepository.findById(id)
+		Member m = memberRepository.findById(id)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", id)));
+		String email = memberRepository.getEmailById(id);
+		m.setEmail(email);
+		return m;
 	}
 }

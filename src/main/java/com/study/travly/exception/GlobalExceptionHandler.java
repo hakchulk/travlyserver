@@ -10,7 +10,7 @@ public class GlobalExceptionHandler {
 
 	// 1단계에서 정의한 FileNotFoundException을 처리하는 핸들러
 	@ExceptionHandler(BadRequestException.class)
-	public ResponseEntity<ErrorResponse> handleFileNotFoundException(BadRequestException ex) {
+	public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
 		// HTTP 상태 코드를 400 BAD_REQUEST로 지정
 		HttpStatus status = HttpStatus.BAD_REQUEST;
 

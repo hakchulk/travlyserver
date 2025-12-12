@@ -66,24 +66,25 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentResponse create(CommentRequest req) {
-		Member member = memberRepository.findById(req.getMemberId())
-				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", req.getMemberId())));
+	public CommentResponse create(Long boardId, CommentRequest req) {
+		Board board = boardRepository.findById(boardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
 
-		Board board = boardRepository.findById(req.getBoardId())
-				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", req.getBoardId())));
+		Long memberId = req.getMemberId();
+		Member member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
 
-		boolean b = commentRepository.existsByBoardIdAndMemberId(req.getBoardId(), req.getMemberId());
+		boolean b = commentRepository.existsByBoardIdAndMemberId(boardId, memberId);
 		if (b)
-			throw new BadRequestException(String.format("Comment 에 board.id [%d], member.id [%d] 가 이미 존재 합니다.",
-					req.getBoardId(), req.getMemberId()));
+			throw new BadRequestException(
+					String.format("Comment 에 board.id [%d], member.id [%d] 가 이미 존재 합니다.", boardId, memberId));
 
 		Comment comment = new Comment(null, board, member, req.getComment(), null, null);
 		commentRepository.save(comment);
-		CommentResponse ret = new CommentResponse(comment.getId(), req.getBoardId(), req.getMemberId(),
-				req.getComment(), comment.getCreatedAt());
+		CommentResponse ret = new CommentResponse(comment.getId(), boardId, memberId, req.getComment(),
+				comment.getCreatedAt());
 
-		// 멤버의 알림을 증가시킨다.
+		// board 작성자의 알림을 증가시킨다.
 		memberRepository.incrementNotificationCount(board.getMember().getId());
 		return ret;
 	}

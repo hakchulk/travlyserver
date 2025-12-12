@@ -37,9 +37,9 @@ public class CommentController {
 		return commentService.getCommentListByBoardId(boardId, p);
 	}
 
-	@PostMapping("comment")
-	public CommentResponse create(@RequestBody CommentRequest req) {
-		return commentService.create(req);
+	@PostMapping("{boardId}/comment")
+	public CommentResponse create(@RequestBody CommentRequest req, @PathVariable("boardId") Long boardId) {
+		return commentService.create(boardId, req);
 	}
 
 	@DeleteMapping("comment/{commentId}")

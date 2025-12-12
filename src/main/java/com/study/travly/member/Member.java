@@ -21,6 +21,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -86,4 +87,7 @@ public class Member {
 		this.updatedAt = LocalDateTime.now();
 	}
 
+	@Transient
+	@Builder.Default
+	String email = "";
 }
