@@ -2,6 +2,9 @@ package com.study.travly.board.bookmark;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.study.travly.board.Board;
 import com.study.travly.member.Member;
 
@@ -33,10 +36,12 @@ public class Bookmark {
 
 	@ManyToOne()
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_bookmark__member_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Member member;
 
 	@ManyToOne()
 	@JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(name = "fk_bookmark__board_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Board board;
 
 	@Column(nullable = false)
