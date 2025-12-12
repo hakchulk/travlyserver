@@ -16,6 +16,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+	@Modifying // DML (Update, Delete) 쿼리임을 명시
+	@Query(value = "UPDATE auth.users "
+			+ "SET raw_user_meta_data = raw_user_meta_data || jsonb_build_object('memberId', :memberId) "
+			+ "WHERE id = :uuid", nativeQuery = true // Native SQL 사용을 명시
+	)
+	int updateRawUserMetaData(@Param("uuid") UUID uuid, @Param("memberId") Long memberId);
+
 	// board comment 가 create 될 때 comment.board.member.notificationCount을 1 증가 시킨다. 
 	@Modifying
 	@Query("UPDATE Member m SET m.notificationCount = m.notificationCount + 1 WHERE m.id = :id")
