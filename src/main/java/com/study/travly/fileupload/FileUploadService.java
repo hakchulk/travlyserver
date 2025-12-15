@@ -80,7 +80,7 @@ public class FileUploadService {
 
 				if (isImage(originalFilename))
 					Thumbnails.of(new ByteArrayInputStream(fileData)).size(thumbX, thumbY).outputFormat("jpg")
-							.toFile(fileDir + "/t_" + newName); // thumbnail 저장
+							.toFile(fileDir + "/t_" + newName + ".jpg"); // thumbnail 저장
 
 				File fileEntity = File.builder().filename(newName).org_filename(originalFilename).build();
 				File newFileEntity = fileRepo.save(fileEntity);

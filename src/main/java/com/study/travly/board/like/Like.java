@@ -48,11 +48,7 @@ public class Like {
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_likes__member_id"))
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Member member;
-	
-	@ManyToOne()
-	@JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(name = "fk_likes__board_id"))
-	private Board board;
-	
+
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
@@ -60,6 +56,5 @@ public class Like {
 	public void onCreated() {
 		this.createdAt = LocalDateTime.now();
 	}
-	
 
 }
