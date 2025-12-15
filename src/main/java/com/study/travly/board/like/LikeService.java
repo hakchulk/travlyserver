@@ -1,5 +1,6 @@
 package com.study.travly.board.like;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class LikeService {
 	private MemberRepository memberRepository;
 
 	@Transactional
-	public boolean toggleLike(Long boardId, Long memberId) {
+	public boolean toggleLike(Long memberId, Long boardId) {
 		Optional<Like> existingLike = likeRepository.findByBoardIdAndMemberId(boardId, memberId);
 
 		
@@ -36,22 +37,17 @@ public class LikeService {
 		
 		//없으면 생성
 		else {
-			Board board = boardRepository.findById(boardId)
-					.orElseThrow(() -> new IllegalArgumentException("게시물 ID 찾을 수 없음"));
-			Member member = memberRepository.findById(memberId)
-					.orElseThrow(() -> new IllegalArgumentException("사용자 ID 찾을 수 없음"));
-			
-			Like newLike = new Like(null, board, member, null);
-			
-			likeRepository.save(newLike);
-			return true;
+		    Board board = boardRepository.findById(boardId)
+		            .orElseThrow(() -> new IllegalArgumentException("게시물 ID 찾을 수 없음"));
+		    Member member = memberRepository.findById(memberId)
+		            .orElseThrow(() -> new IllegalArgumentException("사용자 ID 찾을 수 없음"));
+		    
+		    Like newLike = new Like(null, member, board, null);
+		    
+		    likeRepository.save(newLike);
+		    return true;
 		}
 
-	}
-	
-	public Long getLikeCount(Long boardId) {
-		// Repository를 통해 실시간 조회
-		return likeRepository.countByBoardId(boardId);
 	}
 
 }
