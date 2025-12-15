@@ -50,8 +50,8 @@ public class BoardController {
 		return boardService.getBoardListByMemberId(memberId, p);
 	}
 
-	@GetMapping("member/{memberId}/bookmark")
-	Page<BoardListResponse> getBookmarkBoardList(@PathVariable(name = "memberId") Long memberId,
+	@GetMapping("bookmark")
+	Page<BoardListResponse> getBookmarkBoardList(@RequestParam(name = "memberId") Long memberId,
 			@RequestParam(name = "size", defaultValue = "5") int size,
 			@RequestParam(name = "page", defaultValue = "0") int page) {
 		Pageable p = PageRequest.of(page, size);

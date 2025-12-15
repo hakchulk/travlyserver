@@ -49,7 +49,7 @@ public class BookmarkService {
 		boolean b = bookmarkRepository.existsByBoardIdAndMemberId(boardId, memberId);
 		if (!b)
 			throw new BadRequestException(
-					String.format("Bookmark 에 board.id [%d], member.id [%d] 가 존재 하지 않습니다..", boardId, memberId));
+					String.format("Bookmark 에 board.id [%d], member.id [%d] 가 존재 하지 않습니다.", boardId, memberId));
 
 		// Repository 메서드 호출: 바로 데이터베이스에 DELETE 명령을 보냅니다.
 		int deletedCount = bookmarkRepository.deleteByBoardIdAndMemberId(boardId, memberId);
