@@ -45,6 +45,7 @@ public class Comment {
 
 	@ManyToOne()
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comment_member_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Member member;
 
 	private String comment;

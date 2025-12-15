@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.study.travly.board.place.BoardPlace;
 import com.study.travly.member.Member;
@@ -47,6 +49,7 @@ public class Board {
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_board__member_member_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Member member;
 
 	@Comment("조회수")

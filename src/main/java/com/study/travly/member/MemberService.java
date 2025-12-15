@@ -82,24 +82,24 @@ public class MemberService {
 
 	@Transactional
 	public Member modifyCreateMember(MemberModifyRequest request) {
-		AuthUserProjection userProj = memberRepository.getAuthUserProcedure(request.getAuthUuid())
+		UUID uuid = request.getAuthUuid();
+		AuthUserProjection userProj = memberRepository.getAuthUserProcedure(uuid)
 				// 2. Optional 처리: 결과가 없으면 예외 발생
-				.orElseThrow(() -> new BadRequestException("등록되지 않은 인증 사용자 uuid입니다: " + request.getAuthUuid()));
+				.orElseThrow(() -> new BadRequestException("등록되지 않은 인증 사용자 uuid입니다: " + uuid));
 
 		log.info("============== MemberService.modifyCreateMember()" + userProj.getEmail());
 		// 1. AuthUuid를 기반으로 Member 엔티티 조회 시도
-		Member member = memberRepository.findByAuthUser_Id(request.getAuthUuid()).orElse(null);
+		Member member = memberRepository.findByAuthUser_Id(uuid).orElse(null);
 
 		// 2. 엔티티가 존재하지 않으면, 새로 생성 (Create)
 		if (member == null) {
-			// 새 엔티티이므로 save()를 호출하여 영속화(INSERT)
 			member = memberRepository.save(getNewMember(request));
+			memberRepository.updateRawUserMetaData(uuid, member.getId());
 		} else {
 			member = getUpdatedMember(member, request);
 		}
 
-		String email = memberRepository.getEmailById(member.getId());
-		member.setEmail(email);
+		member.setEmail(userProj.getEmail());
 
 		return member;
 	}

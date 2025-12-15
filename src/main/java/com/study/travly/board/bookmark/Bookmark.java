@@ -2,6 +2,10 @@ package com.study.travly.board.bookmark;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.study.travly.board.Board;
 import com.study.travly.member.Member;
 
@@ -31,13 +35,17 @@ public class Bookmark {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne()
-	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_bookmark__member_id"))
-	private Member member;
-
+	@JsonIgnore
 	@ManyToOne()
 	@JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(name = "fk_bookmark__board_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Board board;
+
+	@JsonIgnore
+	@ManyToOne()
+	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_bookmark__member_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Member member;
 
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
@@ -46,4 +54,5 @@ public class Bookmark {
 	public void onCreated() {
 		this.createdAt = LocalDateTime.now();
 	}
+
 }

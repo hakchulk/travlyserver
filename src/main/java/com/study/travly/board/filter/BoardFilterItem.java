@@ -42,6 +42,7 @@ public class BoardFilterItem {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Board board;
 
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@ManyToOne()
 	@JoinColumn(name = "filter_item_id", nullable = false, foreignKey = @ForeignKey(name = "fk_board_filter_item__filter_item_id"))
 	private Item filterItem;

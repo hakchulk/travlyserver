@@ -51,6 +51,7 @@ public class BoardPlaceFile {
 	// product 에서는 @OneToOne()을 사용 하는 것이 바람직
 	@ManyToOne
 	@JoinColumn(name = "file_id", nullable = false, unique = false, foreignKey = @ForeignKey(name = "fk_board_place_file__file_id"))
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private File file;
 
 	@Column(nullable = false)
