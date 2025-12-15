@@ -20,7 +20,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -29,7 +31,9 @@ import lombok.Setter;
 		@UniqueConstraint(name = "UK_likes__board_member", columnNames = { "board_id", "member_id" }) })
 @Getter
 @Setter
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Like {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +48,11 @@ public class Like {
 	@JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(name = "fk_likes__member_id"))
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Member member;
-
+	
+	@ManyToOne()
+	@JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(name = "fk_likes__board_id"))
+	private Board board;
+	
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
@@ -52,5 +60,6 @@ public class Like {
 	public void onCreated() {
 		this.createdAt = LocalDateTime.now();
 	}
+	
 
 }
