@@ -60,9 +60,9 @@ public class BoardService {
 	 * JSON 요청 하나로 Board, BoardPlace, BoardPlaceFile을 모두 저장합니다.
 	 */
 	@Transactional
-	public Optional<Board> saveBoardWithAllDetails(BoardSaveRequest request) {
+	public Optional<Board> saveBoardWithAllDetails(Long memberId, BoardSaveRequest request) {
 		// Member 엔티티 조회 (FK 제약조건 만족을 위해 필요)
-		Member member = memberRepository.findById(request.getMemberId()).orElseThrow(
+		Member member = memberRepository.findById(memberId).orElseThrow(
 				() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", request.getMemberId())));
 
 		// Board 엔티티 생성 및 관계 설정
@@ -88,15 +88,19 @@ public class BoardService {
 	}
 
 	@Transactional
-	public Optional<Board> updateBoardWithAllDetails(Long boardId, BoardUpdateRequest request) {
+	public Optional<Board> updateBoardWithAllDetails(Long boardId, BoardUpdateRequest request, Long memberId) {
 		// boardId 로 기존 board 조회
 		Board board = boardRepository.findById(boardId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
 
+		if (memberId != board.getMember().getId())
+			throw new BadRequestException(String.format("로그인 memberId[%d]와 게시글 작성자 memberId[%d] 가 같지 않습니다.", memberId,
+					board.getMember().getId()));
+
 		board.setTitle(request.getTitle());
 
 		// BoardPlace.files 에 있는 file들은 삭제 하지 않는다.
-		// 추후 별도 프로세스(데몬)을 작성해서 주기적으로 아무도 참조되고 있지 않은 파일들을 삭제 한다.
+		// 추후 별도 프로세스(데몬)을 작성해서 주기적으로 아무도 참조 되고 있지 않은 파일들을 삭제 한다.
 		boardRepository.deleteBoardPlaceByBoardId(boardId);
 
 		Set<BoardPlace> boardPlaces = new HashSet<>();
@@ -168,10 +172,14 @@ public class BoardService {
 	}
 
 	@Transactional
-	public void delete(Long BoardId) {
-		Board comment = boardRepository.findById(BoardId)
+	public void delete(Long BoardId, Long memberId) {
+		Board board = boardRepository.findById(BoardId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", BoardId)));
 
-		boardRepository.delete(comment);
+		if (memberId != board.getMember().getId())
+			throw new BadRequestException(String.format("로그인 memberId[%d]와 게시글 작성자 memberId[%d] 가 같지 않습니다.", memberId,
+					board.getMember().getId()));
+
+		boardRepository.delete(board);
 	}
 }

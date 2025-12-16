@@ -46,10 +46,15 @@ public class BookmarkService {
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
 
-		boolean b = bookmarkRepository.existsByBoardIdAndMemberId(boardId, memberId);
-		if (!b)
+		Bookmark bookmark = bookmarkRepository.findByBoardIdAndMemberId(boardId, memberId);
+
+		if (bookmark == null)
 			throw new BadRequestException(
 					String.format("Bookmark 에 board.id [%d], member.id [%d] 가 존재 하지 않습니다.", boardId, memberId));
+
+		if (memberId != bookmark.getMember().getId())
+			throw new BadRequestException(String.format("로그인 memberId[%d]와 bookmark 작성자 memberId[%d] 가 같지 않습니다.",
+					memberId, bookmark.getMember().getId()));
 
 		// Repository 메서드 호출: 바로 데이터베이스에 DELETE 명령을 보냅니다.
 		int deletedCount = bookmarkRepository.deleteByBoardIdAndMemberId(boardId, memberId);

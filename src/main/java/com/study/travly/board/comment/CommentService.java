@@ -66,11 +66,10 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentResponse create(Long boardId, CommentRequest req) {
+	public CommentResponse create(Long boardId, CommentRequest req, Long memberId) {
 		Board board = boardRepository.findById(boardId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
 
-		Long memberId = req.getMemberId();
 		Member member = memberRepository.findById(memberId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
 
@@ -90,9 +89,13 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void delete(Long commentId) {
+	public void delete(Long commentId, Long memberId) {
 		Comment comment = commentRepository.findById(commentId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 comment.id [%d]", commentId)));
+
+		if (memberId != comment.getMember().getId())
+			throw new BadRequestException(String.format("로그인 memberId[%d]와 코멘트 작성자 memberId[%d] 가 같지 않습니다.", memberId,
+					comment.getMember().getId()));
 
 		commentRepository.delete(comment);
 	}

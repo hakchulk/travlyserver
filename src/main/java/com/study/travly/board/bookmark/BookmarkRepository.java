@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 	boolean existsByBoardIdAndMemberId(Long boardId, Long memberId);
 
+	Bookmark findByBoardIdAndMemberId(Long boardId, Long memberId);
+
 	@Modifying // DML (DELETE) 쿼리임을 명시
 	@Query("DELETE FROM Bookmark b WHERE b.board.id = :boardId AND b.member.id = :memberId")
 	int deleteByBoardIdAndMemberId(@Param("boardId") Long boardId, @Param("memberId") Long memberId);

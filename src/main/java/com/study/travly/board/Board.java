@@ -53,7 +53,8 @@ public class Board {
 	private Member member;
 
 	@Comment("조회수")
-	private Integer viewCount;
+	@Builder.Default
+	private Integer viewCount = 0;
 
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
