@@ -19,18 +19,5 @@ public class SecurityConfig {
 		return http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
 				.formLogin(form -> form.disable()).httpBasic(httpBasic -> httpBasic.disable())
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).build();
-
-		// 				.authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-		// auth -> auth.requestMatchers("/public/**").permitAll().anyRequest().authenticated())					
-		// .formLogin(form -> form.permitAll()) // /login 페이지 허용
-
 	}
-
-	//	@Bean
-	//	UserDetailsService userDetailsService() {
-	//		UserDetails user = User.withUsername("myuser").password("{noop}mypassword") // {noop}은 암호화 없이 사용
-	//				.roles("USER").build();
-	//		return new InMemoryUserDetailsManager(user);
-	//	}
-
 }

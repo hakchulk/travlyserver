@@ -78,9 +78,10 @@ public class MemberController {
 		return new IsExistResponse(memberService.checkExistence(email, nickname));
 	}
 
-	@GetMapping("{memberId}")
-	public Member getMember(@PathVariable("memberId") Long memberId) {
-		return memberService.getMember(memberId);
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping
+	public Member getMember(@AuthenticationPrincipal CustomUserPrincipal principal) {
+		return memberService.getMember(principal.getMemberId());
 	}
 
 	@GetMapping("/me")
