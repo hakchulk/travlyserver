@@ -95,6 +95,10 @@ public class BoardService {
 
 		board.setTitle(request.getTitle());
 
+		// BoardPlace.files 에 있는 file들은 삭제 하지 않는다.
+		// 추후 별도 프로세스(데몬)을 작성해서 주기적으로 아무도 참조되고 있지 않은 파일들을 삭제 한다.
+		boardRepository.deleteBoardPlaceByBoardId(boardId);
+
 		Set<BoardPlace> boardPlaces = new HashSet<>();
 		int placeOrder = 0; // BoardPlace 순번 카운터
 

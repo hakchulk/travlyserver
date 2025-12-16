@@ -24,4 +24,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
 	@Query("UPDATE Board b SET b.viewCount = b.viewCount + 1 WHERE b.id = :boardID")
 	int incrementViewCount(@Param("boardID") Long boardID);
 
+	@Modifying // DML (DELETE) 쿼리임을 명시
+	@Query("DELETE FROM BoardPlace bp WHERE bp.board.id = :boardId")
+	int deleteBoardPlaceByBoardId(@Param("boardId") Long boardId);
+
 }
