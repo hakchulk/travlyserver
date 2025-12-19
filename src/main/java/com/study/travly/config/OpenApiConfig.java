@@ -14,23 +14,23 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 @Configuration
 public class OpenApiConfig {
 	// 추가적인 Security Scheme 설정 등을 여기에 할 수 있습니다.
-	
-	// 사용할 보안 스키마의 이름입니다.
-    private static final String SECURITY_SCHEME_NAME = "AuthUUIDHeader";
-    
-    @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                // 1. 컴포넌트에 보안 스키마를 정의합니다.
-                .components(new Components()
-                        .addSecuritySchemes(SECURITY_SCHEME_NAME, new SecurityScheme()
-                                .type(SecurityScheme.Type.APIKEY)
-                                .in(SecurityScheme.In.HEADER) // ⬅️ 인증 정보가 헤더에 있음을 명시
-                                .name("X-AUTH-UUID") // ⬅️ 사용하실 헤더 이름 명시
-                                .description("Supabase 인증 후 받은 사용자 UUID 입력")
-                        )
-                )
-                // 2. 정의된 스키마를 API에 적용하도록 명시합니다.
-                .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME));
-    }
+
+	@Bean
+	OpenAPI openAPI() {
+		String jwtSchemeName = "jwtAuth"; // 보안 스키마 이름 설정
+
+		// 1. API 요청에 보안 요구사항 추가
+		SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
+
+		// 2. JWT 보안 스키마 정의 (Header 방식)
+		SecurityScheme securityScheme = new SecurityScheme().name(jwtSchemeName).type(SecurityScheme.Type.HTTP) // HTTP 방식
+				.scheme("bearer") // Bearer 토큰 지정
+				.bearerFormat("JWT"); // 형식이 JWT임을 명시
+
+		return new OpenAPI()
+				.info(new io.swagger.v3.oas.models.info.Info().title("Travly API Document")
+						.description("JWT 기반 인증이 적용된 API 문서").version("v1.0.0"))
+				.addSecurityItem(securityRequirement) // 전역 인증 적용
+				.components(new Components().addSecuritySchemes(jwtSchemeName, securityScheme));
+	}
 }

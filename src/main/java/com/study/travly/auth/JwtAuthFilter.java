@@ -38,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				var claims = jwtUtil.validateToken(token);
 				Long memberId = jwtUtil.extractMemberId(claims);
 
-				// 개발 초기에는 memberId이 null 일 수 있다.
+				// 개발 초기에는 memberId 값을 넣지 않았기 때문에 여기서 별도로 처리.
 				if (memberId == null) {
 					UUID uuid = UUID.fromString(claims.getSubject());
 					memberId = memberReporitory.getIdByAuthUuid(uuid);
