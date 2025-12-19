@@ -40,10 +40,10 @@ public class BookmarkService {
 
 	@Transactional // 트랜잭션 내에서 DELETE 쿼리를 실행해야 합니다.
 	public boolean delete(Long boardId, Long memberId) {
-		Board board = boardRepository.findById(boardId)
+		boardRepository.findById(boardId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
 
-		Member member = memberRepository.findById(memberId)
+		memberRepository.findById(memberId)
 				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
 
 		Bookmark bookmark = bookmarkRepository.findByBoardIdAndMemberId(boardId, memberId);
@@ -61,6 +61,15 @@ public class BookmarkService {
 
 		// 삭제된 행의 수가 1 이상이면 성공으로 간주
 		return deletedCount > 0;
+	}
+
+	public boolean IsBookmarked(Long boardId, Long memberId) {
+		boardRepository.findById(boardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
+
+		memberRepository.findById(memberId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
+		return bookmarkRepository.existsByBoardIdAndMemberId(boardId, memberId);
 	}
 
 }

@@ -23,13 +23,9 @@ public class MemberService {
 	private FileRepository fileRepository;
 	@Autowired
 	private BadgeRepository badgeRepository;
-	@Autowired
-	private AuthUserRepository authUserRepository;
-	
-	
+
 	private Member getNewMember(MemberModifyRequest request) {
 		AuthUser authUser = new AuthUser(request.getAuthUuid());
-	
 
 		// 기본 뱃지 (가장 낮은 등급 등) 조회. (ID 1L을 기본 뱃지로 가정)
 		Badge defaultBadge = badgeRepository.findById(1L)
@@ -127,14 +123,13 @@ public class MemberService {
 		m.setEmail(email);
 		return m;
 	}
-	
+
 	@Transactional(readOnly = true)
 	public Member getLoggedInMember(UUID authUuid) {
 		// UUID와 멤버 아이디 조회
 		Member member = memberRepository.findByAuthUser_Id(authUuid)
-		        .orElseThrow(() -> new BadRequestException("UUID에 해당하는 Member를 찾을 수 없습니다: " + authUuid));
-		    return member;
+				.orElseThrow(() -> new BadRequestException("UUID에 해당하는 Member를 찾을 수 없습니다: " + authUuid));
+		return member;
 	}
-	
-	
+
 }

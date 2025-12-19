@@ -49,4 +49,14 @@ public class LikeService {
 
 	}
 
+	public boolean IsLiked(Long memberId, Long boardId) {
+		boardRepository.findById(boardId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 board.id [%d]", boardId)));
+
+		memberRepository.findById(memberId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
+
+		return likeRepository.existsByBoardIdAndMemberId(boardId, memberId);
+	}
+
 }

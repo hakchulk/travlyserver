@@ -3,6 +3,7 @@ package com.study.travly.board.like;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,7 @@ public class LikeController {
 	@Autowired
 	BoardRepository boardRepository;
 
-	@Operation(summary = "게시물 좋아요/취소 토글", description = "인증된 사용자가 특정 게시물에 좋아요를 등록하거나 이미 등록된 좋아요를 취소합니다.")
+	@Operation(summary = "게시글의 좋아요/취소 토글", description = "인증된 사용자가 특정 게시글에 좋아요를 등록하거나 이미 등록된 좋아요를 취소합니다.")
 	@PostMapping("/{boardId}/like")
 	@PreAuthorize("isAuthenticated()")
 	public LikeResponse toggleLike(@AuthenticationPrincipal CustomUserPrincipal principal,
@@ -44,4 +45,16 @@ public class LikeController {
 		return new LikeResponse(isLiked);
 	}
 
+	@Operation(summary = "게시글의 좋아요 상태 얻기", description = "인증된 사용자가 특정 게시글에 좋아요 상태 조회")
+	@GetMapping("/{boardId}/like")
+	@PreAuthorize("isAuthenticated()")
+	public LikeResponse IsLiked(@AuthenticationPrincipal CustomUserPrincipal principal,
+			@PathVariable("boardId") Long boardId) {
+
+		Long memberId = principal.getMemberId();
+
+		// 좋아요 토글 로직 실행 (Service 계층 위임)
+		boolean isLiked = likeService.IsLiked(memberId, boardId);
+		return new LikeResponse(isLiked);
+	}
 }
