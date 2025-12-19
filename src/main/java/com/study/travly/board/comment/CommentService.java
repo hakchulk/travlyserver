@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.study.travly.board.Board;
 import com.study.travly.board.BoardRepository;
 import com.study.travly.exception.BadRequestException;
+import com.study.travly.file.File;
 import com.study.travly.member.Member;
 import com.study.travly.member.MemberRepository;
 
@@ -42,13 +43,23 @@ public class CommentService {
 	}
 
 	private CommentListDto comment2CommentListDto(Comment comment) {
+		Long memberId = comment.getMember().getId();
+		Member member = memberRepository.findByIdWithDetails(memberId)
+				.orElseThrow(() -> new BadRequestException(String.format("존재하지 않는 member.id [%d]", memberId)));
+
 		CommentListDto dto = new CommentListDto();
 		dto.setId(comment.getId());
 		dto.setComment(comment.getComment());
-		dto.setMemberId(comment.getMember().getId());
+		dto.setMemberId(memberId);
 		dto.setBoardId(comment.getBoard().getId());
 		dto.setNickname(comment.getMember().getNickname());
 		dto.setUpdatedAt(comment.getUpdatedAt());
+
+		dto.setBadgeId(member.getBadge().getId());
+		File memberFile = member.getProfileImage();
+		if (memberFile != null)
+			dto.setProfileImageFilename(memberFile.getThumbFilename());
+
 		return dto;
 	}
 
@@ -60,6 +71,7 @@ public class CommentService {
 		// 1. Repository를 통해 페이징된 Comment 엔티티 목록을 조회합니다.
 		Page<Comment> commentPage = commentRepository.findByMemberId(memberId, pageable);
 		memberRepository.initNotificationCount(memberId);
+
 		return commentPage.map(comment -> {
 			return comment2CommentListDto(comment);
 		});

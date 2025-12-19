@@ -61,4 +61,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 			FROM public.member m WHERE m.auth_uuid = :authUuid
 			""", nativeQuery = true)
 	Long getIdByAuthUuid(@Param("authUuid") UUID authUuid);
+
+	// Fetch Join을 사용하여 한 번의 쿼리로 연관된 file 엔티티를 가져옵니다.
+	@Query("SELECT m FROM Member m JOIN m.badge LEFT JOIN FETCH m.profileImage WHERE m.id = :id")
+	Optional<Member> findByIdWithDetails(@Param("id") Long id);
 }

@@ -1,11 +1,14 @@
 package com.study.travly.file;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,4 +32,12 @@ public class File {
 
 	@Column(nullable = false)
 	private String org_filename;
+
+	@Transient
+	@JsonIgnore // JSON 응답에서 제외하고 싶을 때
+	public String getThumbFilename() {
+		if (this.filename == null)
+			return null;
+		return "t_" + filename;
+	}
 }

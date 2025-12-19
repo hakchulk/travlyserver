@@ -11,5 +11,7 @@ public class CommentListDto {
 	private Long memberId;
 	private Long boardId;
 	private String nickname;
+	private String profileImageFilename;
+	private Long badgeId;
 	private LocalDateTime updatedAt;
 }
