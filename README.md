@@ -78,9 +78,16 @@
 
 ---
 
+## 📺 Project Demo & Video
+프로젝트의 실행 화면 및 상세 설명은 아래 채널에서 확인하실 수 있습니다.
+
+[![YouTube Channel](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/channel/UCcwyO1iPsPJFevyNwO9NXmw)
+> 위 버튼을 클릭하면 Travly 관련 영상 채널로 이동합니다.
+
+---
 ## 🚀 Installation & Setup
 
-1. **Repository Clone**
+ **Repository Clone**
    ```bash
    git clone [https://github.com/hakchulk/travlyserver.git](https://github.com/hakchulk/travlyserver.git)
    ```
