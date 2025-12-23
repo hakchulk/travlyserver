@@ -1,7 +1,7 @@
-[Travly](https://github.com/hakchulk/travlyserver/blob/main/src/main/resources/travly.png)
-# - 여행 기록과 공유, 그리고 사용자 성장 경험을 결합한 지도 기반 커뮤니티 플랫폼 API
+![Travly](https://github.com/hakchulk/travlyserver/blob/dev/src/main/resources/travly.png?raw=true)
+## - 여행 기록과 공유, 그리고 사용자 성장 경험을 결합한 지도 기반 커뮤니티 플랫폼 API
 
-**Travly**는 사용자들이 자신만의 특별한 여행 경로를 기록하고 공유할 수 있도록 돕는 RESTful API 서버입니다. Spring Boot와 JPA를 기반으로 효율적인 데이터 처리를 구현.
+**Travly Server**는 사용자들이 자신만의 특별한 여행 경로를 기록하고 공유할 수 있도록 돕는 RESTful API 서버입니다. Spring Boot와 JPA를 기반으로 효율적인 데이터 처리를 구현.
 
 ---
 
@@ -9,12 +9,15 @@
 
 ### Backend
 
-<img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white"> <img src="https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=hibernate&logoColor=white">
+<img src="https://img.shields.io/badge/Java%2017-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Boot%203.5.8-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white"> <img src="https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white">
 
 ### Database & Auth
 
-<img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white"> <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"> <img src="https://img.shields.io/badge/JWT(HS256)-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white">
+<img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white"> <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white">
 
+### Libraries & Tools
+
+<img src="https://img.shields.io/badge/Gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white"> <img src="https://img.shields.io/badge/Swagger(Springdoc)-85EA2D?style=for-the-badge&logo=swagger&logoColor=black"> <img src="https://img.shields.io/badge/Lombok-BC2139?style=for-the-badge"> <img src="https://img.shields.io/badge/Thumbnailator-FF6F00?style=for-the-badge&logo=image-charts&logoColor=white">
 ---
 
 ## 🏗 Project Architecture
