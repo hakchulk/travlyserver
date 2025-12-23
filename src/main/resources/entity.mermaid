@@ -1,0 +1,102 @@
+classDiagram
+    %% [Auth & Member]
+    class AuthUser {
+        +UUID id
+    }
+    class Member {
+        +Long id
+        +String nickname
+        +String introduction
+        +int notificationCount
+    }
+    class Badge {
+        +Long id
+        +String name
+        +int likeMin
+        +int likeMax
+    }
+
+    %% [Board & Interactions]
+    class Board {
+        +Long id
+        +String title
+        +Integer viewCount
+    }
+    class Like {
+        +Long id
+    }
+    class Bookmark {
+        +Long id
+    }
+    class Comment {
+        +Long id
+        +String comment
+    }
+
+    %% [Board Details]
+    class BoardPlace {
+        +Long id
+        +String title
+        +double x
+        +double y
+        +int orderNum
+    }
+    class BoardPlaceFile {
+        +Long id
+        +int orderNum
+    }
+    class File {
+        +Long id
+        +String filename
+    }
+
+    %% [Filter System]
+    class Category {
+        +Long id
+        +String name
+    }
+    class Item {
+        +Long id
+        +String name
+    }
+    class BoardFilterItem {
+        +Long id
+    }
+
+    %% [Q&A System]
+    class QnaBoard {
+        +Long id
+        +String title
+        +String content
+    }
+    class QnaComment {
+        +Long id
+        +String comment
+    }
+
+    %% Relationships
+    AuthUser "1" -- "1" Member : 인증 정보 연동
+    Member "*" -- "1" Badge : 소유한 뱃지
+    Member "1" -- "*" Board : 작성
+    Member "1" -- "*" Comment : 작성
+    Member "1" -- "*" Like : 누름
+    Member "1" -- "*" Bookmark : 보관
+    Member "1" -- "0..1" File : 프로필 이미지
+
+    Board "1" -- "*" BoardPlace : 장소 포함
+    Board "1" -- "*" Comment : 댓글 포함
+    Board "1" -- "*" Like : 좋아요 포함
+    Board "1" -- "*" Bookmark : 북마크 대상
+    Board "1" -- "*" BoardFilterItem : 필터링
+
+    BoardPlace "1" -- "*" BoardPlaceFile : 장소별 사진
+    BoardPlaceFile "*" -- "1" File : 실제 파일
+
+    Category "1" -- "*" Item : 하위 아이템
+    BoardFilterItem "*" -- "1" Item : 필터 참조
+
+    %% Q&A Relationships
+    Member "1" -- "*" QnaBoard : 질문 작성
+    Member "1" -- "*" QnaComment : 답변 작성
+    QnaBoard "1" -- "*" QnaComment : Q&A 댓글
+    QnaBoard "*" -- "1" File : 첨부 파일
