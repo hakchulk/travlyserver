@@ -92,4 +92,4 @@
    git clone [https://github.com/hakchulk/travlyserver.git](https://github.com/hakchulk/travlyserver.git)
    ```
 ## Entity Class Diagram
-![Travly Logo](https://github.com/hakchulk/travlyserver/blob/dev/src/main/resources/entity-mermaid-diagram-2025-12-23-174641?raw=true)
+![Class Diagram](https://github.com/hakchulk/travlyserver/blob/dev/src/main/resources/entity-mermaid-diagram-2025-12-23-174641.svg?raw=true)
