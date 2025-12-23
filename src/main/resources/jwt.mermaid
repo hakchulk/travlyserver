@@ -1,0 +1,38 @@
+classDiagram
+    class WebConfig {
+        -String jwtSecret
+        +jwtUtil() JwtUtil
+        +jwtAuthFilter(JwtUtil) JwtAuthFilter
+    }
+    class SecurityConfig {
+        +filterChain(HttpSecurity, JwtAuthFilter) SecurityFilterChain
+    }
+    class JwtAuthFilter {
+        -JwtUtil jwtUtil
+        -MemberRepository memberRepository
+        #doFilterInternal()
+    }
+    class JwtUtil {
+        -SecretKey secretKey
+        +validateToken(String) Claims
+        +extractMemberId(Claims) Long
+    }
+    class CustomUserPrincipal {
+        -String userId
+        -Long memberId
+        +getMemberId() Long
+    }
+    class OpenApiConfig {
+        +openAPI() OpenAPI
+    }
+    class UserDetails {
+        <<interface>>
+    }
+
+    WebConfig ..> JwtUtil : 생성 및 빈 등록
+    WebConfig ..> JwtAuthFilter : 생성 및 빈 등록
+    SecurityConfig --> JwtAuthFilter : 필터 체인에 추가
+    JwtAuthFilter --> JwtUtil : 토큰 파싱/검증 위임
+    JwtAuthFilter ..> CustomUserPrincipal : 인증 객체 생성
+    CustomUserPrincipal ..|> UserDetails : Security 표준 구현
+    OpenApiConfig ..> SecurityConfig : Swagger JWT 스키마 설정 공유
