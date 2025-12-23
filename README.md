@@ -95,4 +95,4 @@
 ![Class Diagram](https://raw.githubusercontent.com/hakchulk/travlyserver/3aad95ee66cfa837744d702820af2ca8884334de/src/main/resources/entity-mermaid-diagram-2025-12-23-174641.svg?raw=true)
 
 ## JWT Class Diagram
-![Class Diagram](https://raw.githubusercontent.com/hakchulk/travlyserver/3aad95ee66cfa837744d702820af2ca8884334de/src/main/resources/jwt-mermaid-diagram-2025-12-23-180804.svg?raw=true)
+![Class Diagram](https://raw.githubusercontent.com/hakchulk/travlyserver/5f2d8c6f13782e64f730567b751f77a8d0fa1aa0/src/main/resources/jwt-mermaid-diagram-2025-12-23-180804.svg?raw=true)
